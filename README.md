@@ -9,8 +9,8 @@ This is the **frontend** codebase of the e-commerce web application. It is built
 ### User
 - Register & login with JWT-based authentication
 - Profile view and update
-- Add items to cart
-- View cart with live item count
+- Add items to cart (coming soon)
+- View cart with live item count (coming soon)
 - Wishlist and Orders (coming soon)
 - Password reset flow
 
