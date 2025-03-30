@@ -30,11 +30,11 @@ This is the **frontend** codebase of the e-commerce web application. It is built
 
 ## Tech Stack
 
-React.js - Component-based frontend framework
-Redux Toolkit - Centralized state management
-React Router - Client-side routing
-Material UI - Modern UI component library 
-Axios - API communication
-jwt-decode - Decode JWT for role-based access
-AWS S3 - File storage backend   
-Vercel - For frontend hosting                  
+- React.js - Component-based frontend framework
+- Redux Toolkit - Centralized state management
+- React Router - Client-side routing
+- Material UI - Modern UI component library 
+- Axios - API communication
+- jwt-decode - Decode JWT for role-based access
+- AWS S3 - File storage backend   
+- Vercel - For frontend hosting                  
