@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -18,7 +18,6 @@ import {
   ListItemText,
   Divider,
   useMediaQuery,
-  Slide,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
@@ -26,12 +25,6 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MenuIcon from "@mui/icons-material/Menu";
-import PeopleIcon from "@mui/icons-material/People";
-import AddBoxIcon from "@mui/icons-material/AddBox";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ListAltIcon from "@mui/icons-material/ListAlt";
-import ExitToAppIcon from "@mui/icons-material/ExitToApp";
-import LoginIcon from "@mui/icons-material/Login";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../store/slices/authSlice.js";
@@ -48,14 +41,20 @@ const Navbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [adminMenuAnchor, setAdminMenuAnchor] = useState(null);
 
-  let isAdmin = false;
-  let adminName = "Admin";
-  if (user?.token) {
-    const decodedToken = jwtDecode(user.token);
-    isAdmin = decodedToken?.isAdmin || false;
-    if (user?.ownerName) {
-      adminName = user.ownerName;
+  useEffect(() => {
+    if (!user) {
+      const localUser = JSON.parse(localStorage.getItem("user"));
+      if (localUser) {
+        dispatch({ type: "auth/setUser", payload: localUser });
+      }
     }
+  }, [user, dispatch]);
+
+  let isAdmin = false;
+  const token = user?.token || JSON.parse(localStorage.getItem("user"))?.token;
+  if (token) {
+    const decodedToken = jwtDecode(token);
+    isAdmin = decodedToken?.isAdmin || false;
   }
 
   const handleLogout = () => {
@@ -76,57 +75,31 @@ const Navbar = () => {
   };
 
   const drawerContent = (
-    <Slide direction="right" in={drawerOpen} mountOnEnter unmountOnExit>
-      <Box sx={{ width: 250, p: 2 }} role="presentation" onClick={toggleDrawer(false)}>
-        <List>
-          {isAdmin ? (
-            <>
-              <ListItem button onClick={() => navigate("/admin")}> 
-                <ListItemIcon><PeopleIcon /></ListItemIcon>
-                <ListItemText primary="Users" />
-              </ListItem>
-              <ListItem button onClick={() => navigate("/admin/add-product")}>
-                <ListItemIcon><AddBoxIcon /></ListItemIcon>
-                <ListItemText primary="Add a Product" />
-              </ListItem>
-            </>
-          ) : (
-            <>
-              <ListItem button onClick={() => navigate("/orders")}>
-                <ListItemIcon><ListAltIcon /></ListItemIcon>
-                <ListItemText primary="My Orders" />
-              </ListItem>
-              <ListItem button onClick={() => navigate("/wishlist")}>
-                <ListItemIcon><FavoriteIcon /></ListItemIcon>
-                <ListItemText primary="Wishlist" />
-              </ListItem>
-            </>
-          )}
-          <Divider />
-          <ListItem button onClick={() => navigate("/cart")}>
-            <ListItemIcon><ShoppingCartIcon /></ListItemIcon>
-            <ListItemText primary={`Cart (${cartItemCount})`} />
-          </ListItem>
-          {user ? (
-            <>
-              <ListItem button onClick={() => navigate("/profile")}> 
-                <ListItemIcon><AccountCircleIcon /></ListItemIcon>
-                <ListItemText primary="Profile" />
-              </ListItem>
-              <ListItem button onClick={handleLogout}>
-                <ListItemIcon><ExitToAppIcon /></ListItemIcon>
-                <ListItemText primary="Logout" />
-              </ListItem>
-            </>
-          ) : (
-            <ListItem button onClick={() => navigate("/login")}> 
-              <ListItemIcon><LoginIcon /></ListItemIcon>
-              <ListItemText primary="Login" />
-            </ListItem>
-          )}
-        </List>
-      </Box>
-    </Slide>
+    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+      <List>
+        {isAdmin ? (
+          <>
+            <ListItem button onClick={() => navigate("/admin")}>Users</ListItem>
+            <ListItem button onClick={() => navigate("/admin/add-product")}>Add a Product</ListItem>
+          </>
+        ) : (
+          <>
+            <ListItem button onClick={() => navigate("/orders")}>My Orders</ListItem>
+            <ListItem button onClick={() => navigate("/wishlist")}>Wishlist</ListItem>
+          </>
+        )}
+        <Divider />
+        <ListItem button onClick={() => navigate("/cart")}>Cart ({cartItemCount})</ListItem>
+        {user ? (
+          <>
+            <ListItem button onClick={() => navigate("/profile")}>Profile</ListItem>
+            <ListItem button onClick={handleLogout}>Logout</ListItem>
+          </>
+        ) : (
+          <ListItem button onClick={() => navigate("/login")}>Login</ListItem>
+        )}
+      </List>
+    </Box>
   );
 
   return (
@@ -171,7 +144,7 @@ const Navbar = () => {
                   endIcon={<ArrowDropDownIcon />}
                   sx={{ textTransform: "none", mr: 2, fontWeight: "bold" }}
                 >
-                  {adminName}
+                  Admin
                 </Button>
                 <Menu
                   anchorEl={adminMenuAnchor}
