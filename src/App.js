@@ -13,13 +13,14 @@ import { jwtDecode } from "jwt-decode";
 
 const App = () => {
   const { user, loading } = useSelector((state) => state.auth);
-
+  
+  const storedUser = JSON.parse(localStorage.getItem('user'));
   let isAdmin = false;
   let isApproved = false;
 
-  if (user?.token) {
+  if (user?.token || storedUser?.token) {
     try {
-      const decoded = jwtDecode(user.token);
+      const decoded = jwtDecode(user?.token || storedUser.token);
       isAdmin = decoded?.isAdmin;
       isApproved = decoded?.isApproved;
     } catch (err) {
@@ -29,7 +30,6 @@ const App = () => {
 
   return (
     <Layout>
-      {/* Global Full Page Loader */}
       {loading && <PageLoader />}
 
       <Routes>
