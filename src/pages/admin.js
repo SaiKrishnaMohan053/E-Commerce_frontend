@@ -3,7 +3,7 @@ import {
   Box, Button, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, Dialog, DialogActions,
   DialogContent, DialogTitle, TextField, Typography, IconButton,
-  CircularProgress, DialogContentText, useMediaQuery
+  CircularProgress, DialogContentText, useMediaQuery,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -115,6 +115,7 @@ const AdminManagement = () => {
       {loading ? (
         <Typography>Loading users...</Typography>
       ) : (
+      <Box sx={{ width: "100%", overflowX: 'auto' }}>
         <TableContainer component={Paper} sx={{ maxHeight: "80vh", overflow: "auto" }}>
           <Table stickyHeader size={isMobile ? "small" : "medium"}>
             <TableHead sx={{ backgroundColor: "#f0f0f0" }}>
@@ -146,6 +147,7 @@ const AdminManagement = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      </Box>
       )}
 
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
