@@ -4,7 +4,9 @@ import {
   TableHead, TableRow, Paper, Dialog, DialogActions,
   DialogContent, DialogTitle, TextField, Typography, IconButton,
   CircularProgress, DialogContentText, useMediaQuery,
+  InputAdornment
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchUsers, approveUser, rejectUser,
@@ -41,10 +43,20 @@ const AdminManagement = () => {
   const [deleteUserId, setDeleteUserId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [snack, setSnack] = useState({ open: false, message: "", severity: "success" });
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
+
+  const filteredUsers = users.filter(user => {
+    const term = searchTerm.toLowerCase();
+    return (
+      user.storeName?.toLowerCase().includes(term) ||
+      user.ownerName?.toLowerCase().includes(term) ||
+      user.address?.toLowerCase().includes(term)
+    );
+  });
 
   const handleApprove = async (userId) => {
     setSubmitting(true);
@@ -112,10 +124,26 @@ const AdminManagement = () => {
         Admin - User Management
       </Typography>
 
+      <TextField
+        placeholder="Search by Store Name, Owner Name or Address"
+        variant="outlined"
+        size="small"
+        fullWidth
+        sx={{ mb: 2, maxWidth: 400 }}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          )
+        }}
+      />
+
       {loading ? (
         <Typography>Loading users...</Typography>
       ) : (
-      <Box sx={{ width: "100%", overflowX: 'auto' }}>
         <TableContainer component={Paper} sx={{ maxHeight: "80vh", overflow: "auto" }}>
           <Table stickyHeader size={isMobile ? "small" : "medium"}>
             <TableHead sx={{ backgroundColor: "#f0f0f0" }}>
@@ -133,7 +161,7 @@ const AdminManagement = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <MemoizedUserRow
                   key={user._id}
                   user={user}
@@ -147,7 +175,6 @@ const AdminManagement = () => {
             </TableBody>
           </Table>
         </TableContainer>
-      </Box>
       )}
 
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
@@ -200,13 +227,6 @@ const AdminManagement = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <SnackbarAlert
-        open={snack.open}
-        setOpen={(val) => setSnack((prev) => ({ ...prev, open: val }))}
-        message={snack.message}
-        severity={snack.severity}
-      />
     </Box>
   );
 };
@@ -228,32 +248,30 @@ const MemoizedUserRow = memo(({ user, handleApprove, handleReject, handleEditCli
     <TableCell sx={cellStyle}>{user.einNumber || "—"}</TableCell>
     <TableCell sx={cellStyle}>
       {user.salesTaxLicense ? (
-      <Button
-        variant="text"
-        size="small"
-        href={typeof user.salesTaxLicense === 'object' ? user.salesTaxLicense.url : user.salesTaxLicense}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View
-      </Button>
+        <Button
+          variant="text"
+          size="small"
+          href={typeof user.salesTaxLicense === 'object' ? user.salesTaxLicense.url : user.salesTaxLicense}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View
+        </Button>
       ) : "—"}
     </TableCell>
-
     <TableCell sx={cellStyle}>
       {user.abcLicense ? (
-      <Button
-        variant="text"
-        size="small"
-        href={typeof user.abcLicense === 'object' ? user.abcLicense.url : user.abcLicense}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        View
-      </Button>
+        <Button
+          variant="text"
+          size="small"
+          href={typeof user.abcLicense === 'object' ? user.abcLicense.url : user.abcLicense}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View
+        </Button>
       ) : "—"}
-  </TableCell>
-
+    </TableCell>
     <TableCell>
       {user.isApproved ? (
         <Typography sx={{ color: "green", fontWeight: 500 }}>Approved</Typography>
