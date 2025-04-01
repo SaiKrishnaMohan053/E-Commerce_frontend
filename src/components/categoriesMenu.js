@@ -109,14 +109,19 @@ const CategoriesMenu = () => {
   };
 
   const handleScroll = (direction) => {
-    if (scrollRef.current) {
-      const scrollAmount = 200;
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
+    if (!scrollRef.current) return;
+  
+    const container = scrollRef.current;
+    const scrollAmount = 200;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+  
+    let newScrollLeft =
+      direction === "left"
+        ? Math.max(0, container.scrollLeft - scrollAmount)
+        : Math.min(maxScroll, container.scrollLeft + scrollAmount);
+  
+    container.scrollTo({ left: newScrollLeft, behavior: "smooth" });
+  };  
 
   return (
     <Box
@@ -159,7 +164,12 @@ const CategoriesMenu = () => {
           scrollbarWidth: "none",
           "&::-webkit-scrollbar": { display: "none" },
           overscrollBehaviorX: "contain",
-          WebkitOverflowScrolling: "touch"
+          WebkitOverflowScrolling: "touch",
+          scrollSnapType: "x mandatory",
+          "& > *": {
+            scrollSnapAlign: "start",
+            flexShrink: 0,
+          },
         }}
       >
         {categories.map((category) => (
