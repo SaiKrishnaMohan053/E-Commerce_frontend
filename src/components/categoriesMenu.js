@@ -158,6 +158,8 @@ const CategoriesMenu = () => {
           padding: "0 50px",
           scrollbarWidth: "none",
           "&::-webkit-scrollbar": { display: "none" },
+          overscrollBehaviorX: "contain",
+          WebkitOverflowScrolling: "touch"
         }}
       >
         {categories.map((category) => (
