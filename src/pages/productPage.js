@@ -167,36 +167,37 @@ const ProductPage = () => {
             </Typography>
           )}
 
-          <Box display="flex" alignItems="center" gap={2} mt={2}>
-            <Box>
-              <Typography fontSize="14px">Quantity</Typography>
-              <TextField
-                type="number"
-                size="small"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                inputProps={{ min: 1 }}
-                sx={{ width: "80px" }}
-              />
+            <Box display="flex" alignItems="center" gap={2} mt={2}>
+              <Box>
+                <Typography fontSize="14px">Quantity</Typography>
+                <TextField
+                  type="number"
+                  size="small"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  inputProps={{ min: 1 }}
+                  sx={{ width: "80px" }}
+                />
+              </Box>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<ShoppingCartIcon />}
+                disabled={isOutOfStock}
+                sx={{ borderRadius: 2, height: "40px", mt: isMobile ? 1 : 3 }}
+              >
+                {isOutOfStock ? "Out of Stock" : "ADD TO CART"}
+              </Button>
             </Box>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<ShoppingCartIcon />}
-              disabled={isOutOfStock}
-              sx={{ borderRadius: 2, height: "40px", mt: isMobile ? 1 : 3 }}
-            >
-              {isOutOfStock ? "Out of Stock" : "ADD TO CART"}
-            </Button>
-          </Box>
 
-          {!user && (
-            <Typography fontSize="14px" mt={2} color="gray">
-              * Please login to see price details and purchase
-            </Typography>
-          )}
+            {!user && (
+              <Typography fontSize="14px" mt={2} color="gray">
+                * Please login to see price details and purchase
+              </Typography>
+            )}
+          </Box>
         </Box>
-      </Box>
+
         <Box mt={4}>
           <Typography variant="h6" mb={2}>Related Products</Typography>
 
@@ -211,6 +212,7 @@ const ProductPage = () => {
                 overflowX: "auto",
                 gap: 2,
                 pb: 1,
+                px: 1,
                 "&::-webkit-scrollbar": {
                   height: "8px",
                 },
@@ -221,44 +223,58 @@ const ProductPage = () => {
               }}
             >
               {relatedProducts.slice(0, 6).map((item) => (
-                <Box key={item._id} sx={{ minWidth: 200, flexShrink: 0 }}>
+                <Box
+                  key={item._id}
+                  sx={{
+                    minWidth: 160,
+                    maxWidth: 180,
+                    flexShrink: 0,
+                  }}
+                >
                   <MiniProductCard product={item} />
                 </Box>
               ))}
 
-              <Box sx={{
-          minWidth: 200,
-          flexShrink: 0,
-          backgroundColor: "#f5f5f5", 
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          transition: "all 0.3s ease-in-out",
-          "&:hover": {
-            backgroundColor: "#fff",
-          },
-        }}>
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => navigate(`/category/${selectedProduct.category}`)}
-          sx={{
-            color: "#00bcd4", 
-            fontWeight: 600,
-            textTransform: "none",
-            "&:hover": {
-              backgroundColor: "transparent", 
-              color: "#00bcd4",               
-            },
-          }}
-        >
-          See More
-        </Button>
-      </Box>
-    </Box>
-  )}
-</Box>
+              {/* See More Card */}
+              <Box
+                sx={{
+                  minWidth: 160,
+                  maxWidth: 180,
+                  flexShrink: 0,
+                  backgroundColor: "#f5f5f5",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 2,
+                  boxShadow: 0,
+                  p: 2,
+                  cursor: "pointer",
+                  transition: "all 0.3s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "#fff",
+                  },
+                }}
+                onClick={() =>
+                  navigate(`/category/${selectedProduct.category}`)
+                }
+              >
+                <Typography
+                  sx={{
+                    color: "#00bcd4",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    fontSize: "14px",
+                    "&:hover": {
+                      color: "#00bcd4",
+                    },
+                  }}
+                >
+                  See More
+                </Typography>
+              </Box>
+            </Box>
+          )}
+        </Box>
     </Box>
   );
 };
