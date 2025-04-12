@@ -1,16 +1,12 @@
 import React, { useEffect } from "react";
-import { Snackbar, Alert, useMediaQuery } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { Snackbar, Alert } from "@mui/material";
 
 const SnackbarAlert = ({ message, severity = "info", open, setOpen }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   useEffect(() => {
     if (open) {
       const timer = setTimeout(() => {
         setOpen(false);
-      }, 5000);
+      }, 5000); // Auto-close after 5 seconds
 
       return () => clearTimeout(timer);
     }
@@ -19,10 +15,16 @@ const SnackbarAlert = ({ message, severity = "info", open, setOpen }) => {
   return (
     <Snackbar
       open={open}
-      anchorOrigin={{ vertical: isMobile ? "bottom" : "top", horizontal: "center" }}
-      sx={{ maxWidth: isMobile ? "90%" : "400px", mx: "auto" }}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "left", // 👈 move to bottom-left
+      }}
     >
-      <Alert severity={severity} sx={{ width: "100%", fontSize: isMobile ? "0.85rem" : "1rem" }}>
+      <Alert
+        severity={severity}
+        onClose={() => setOpen(false)}
+        sx={{ width: "100%", fontSize: "0.95rem" }}
+      >
         {message}
       </Alert>
     </Snackbar>

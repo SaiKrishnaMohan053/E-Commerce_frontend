@@ -4,7 +4,21 @@ import { jwtDecode } from "jwt-decode";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
-const user = JSON.parse(localStorage.getItem("user")) || null;
+const isTokenExpired = (token) => {
+  try {
+    const decoded = jwtDecode(token);
+    return decoded.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+};
+
+let user = JSON.parse(localStorage.getItem("user"));
+if (user?.token && isTokenExpired(user.token)) {
+  console.log("Token expired. Logging out user.");
+  localStorage.removeItem("user");
+  user = null;
+}
 
 const setAuthHeader = (token) => {
   if (token) {

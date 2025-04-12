@@ -29,19 +29,43 @@ import AddIcon from "@mui/icons-material/Add";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../store/slices/authSlice.js";
 import { jwtDecode } from "jwt-decode";
-
+import axios from "axios";
 
 const Navbar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const cartItemCount = useSelector((state) => state.cart?.items.length || 0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    const delaySearch = setTimeout(async () => {
+      if (searchTerm.length > 1) {
+        try {
+          const { data } = await axios.get(
+            `${API_BASE_URL}/api/products/getProducts?name=${searchTerm}`
+          );
+          setSearchResults(data.products || []);
+        } catch (err) {
+          console.error("Search failed:", err);
+          setSearchResults([]);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+  
+    return () => clearTimeout(delaySearch);
+  }, [searchTerm, API_BASE_URL]);       
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [adminMenuAnchor, setAdminMenuAnchor] = useState(null);
@@ -145,6 +169,7 @@ const Navbar = () => {
   );  
 
   return (
+    <Box sx={{position: "relative"}}>
     <AppBar position="static" sx={{ backgroundColor: "#1976d2", py: 1 }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -162,20 +187,86 @@ const Navbar = () => {
           </Typography>
         </Box>
 
-        <TextField
-          variant="outlined"
-          size="small"
-          placeholder="Search..."
-          sx={{ width: isMobile ? "45%" : "30%", backgroundColor: "white", borderRadius: 1 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
-
+        <Box sx={{ position: "relative", width: isMobile ? "45%" : "30%" }}>
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            fullWidth
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 1,
+              zIndex: 1600,
+              position: "relative",
+            }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+          />
+          {searchTerm.length > 1 && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                mt: "-2px",
+                bgcolor: "#fff",
+                border: "1px solid #ccc",
+                borderTop: "none",
+                borderRadius: "0 0 8px 8px",
+                zIndex: 10,
+                overflow: "hidden",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+              }}
+            >
+              {searchResults.length > 0 ? (
+                searchResults.map((product) => (
+                  <Box
+                    key={product._id}
+                    onClick={() => {
+                      if (location.pathname !== `/product/${product._id}`) {
+                        navigate(`/product/${product._id}`);
+                      }
+                      setSearchTerm("");
+                      setSearchResults([]);
+                    }}
+                    sx={{
+                      px: 2,
+                      py: 1.2,
+                      cursor: "pointer",
+                      fontSize: "0.95rem",
+                      color: "#333",
+                      "&:hover": {
+                        backgroundColor: "#f0f0f0",
+                      },
+                    }}
+                  >
+                    {product.name}
+                  </Box>
+                ))
+              ) : (
+                <Box
+                  sx={{
+                    px: 2,
+                    py: 1.2,
+                    fontSize: "0.95rem",
+                    color: "#999",
+                    fontWeight: 400,
+                  }}
+                >
+                  No results found
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
         {!isMobile && (
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {isAdmin ? (
@@ -227,7 +318,8 @@ const Navbar = () => {
         {drawerContent}
       </Drawer>
     </AppBar>
-  );
+    </Box>
+  );  
 };
 
-export default Navbar;
+export default React.memo(Navbar);

@@ -10,27 +10,21 @@ import { useNavigate } from "react-router-dom";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import MedicationIcon from "@mui/icons-material/Medication";
-import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import VapeFreeIcon from "@mui/icons-material/VapeFree";
-import CheckroomIcon from "@mui/icons-material/Checkroom";
-import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
-import ManIcon from "@mui/icons-material/Man";
-import DevicesIcon from "@mui/icons-material/Devices";
-import WeekendIcon from "@mui/icons-material/Weekend";
-import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
-import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import WhatshotIcon from "@mui/icons-material/Whatshot";
+import LightIcon from "@mui/icons-material/Light";
+import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
+import LocalFloristIcon from "@mui/icons-material/LocalFlorist";
 
 const categories = [
   { name: "Medicines", icon: <MedicationIcon />, subcategories: [] },
+  { name: "Disposables", icon: <VapeFreeIcon />, subcategories: [] },
   { name: "Supplements", icon: <FitnessCenterIcon />, subcategories: [] },
-  { name: "Vapes", icon: <VapeFreeIcon />, subcategories: ["Disposable", "Flavored"] },
-  { name: "T-Shirts", icon: <CheckroomIcon />, subcategories: [] },
-  { name: "Two Wheelers", icon: <TwoWheelerIcon />, subcategories: ["Petrol Vehicles", "Electric Vehicles"] },
-  { name: "Fashion", icon: <ManIcon />, subcategories: ["Men", "Women", "Kids"] },
-  { name: "Electronics", icon: <DevicesIcon />, subcategories: ["Mobiles", "Laptops", "Accessories"] },
-  { name: "Home & Furniture", icon: <WeekendIcon />, subcategories: ["Decor", "Kitchen", "Bedroom"] },
-  { name: "Beauty & Health", icon: <FaceRetouchingNaturalIcon />, subcategories: ["Skincare", "Haircare", "Makeup"] },
-  { name: "Groceries", icon: <ShoppingBasketIcon />, subcategories: ["Fruits", "Vegetables", "Dairy"] },
+  { name: "Incense Sticks", icon: <WhatshotIcon />, subcategories: [] },
+  { name: "Lighters & Butanes", icon: <LightIcon />, subcategories: [] },
+  { name: "Grinders", icon: <PrecisionManufacturingIcon />, subcategories: [] },
+  { name: "Cannabis", icon: <LocalFloristIcon />, subcategories: ["Flower", "Gummies", "Disposables", "Prerolls"] },
 ];
 
 const CategoryItem = memo(({ category, handleOpen, navigate, anchorEl, currentCategory, handleClose }) => (
@@ -110,18 +104,18 @@ const CategoriesMenu = () => {
 
   const handleScroll = (direction) => {
     if (!scrollRef.current) return;
-  
+
     const container = scrollRef.current;
     const scrollAmount = 200;
     const maxScroll = container.scrollWidth - container.clientWidth;
-  
+
     let newScrollLeft =
       direction === "left"
         ? Math.max(0, container.scrollLeft - scrollAmount)
         : Math.min(maxScroll, container.scrollLeft + scrollAmount);
-  
+
     container.scrollTo({ left: newScrollLeft, behavior: "smooth" });
-  };  
+  };
 
   return (
     <Box
