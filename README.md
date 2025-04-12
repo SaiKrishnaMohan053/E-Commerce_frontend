@@ -1,7 +1,7 @@
 
 # E-Commerce - Frontend
 
-This is e-commerce web application. It is built using React.js and supports both regular users and administrators with features such as user registration, login, profile, admin panel, user management, and product management.
+This is frontend e-commerce web application. It is built using React.js and supports both regular users and administrators with features such as user registration, login, profile, admin panel, user management, and product management.
 
 ---
 
@@ -55,5 +55,10 @@ This is e-commerce web application. It is built using React.js and supports both
 - Cart functionality and live updates
 - Wishlist and order tracking
 - Admin dashboard analytics
-- Role-based route guards
-- Enhanced filtering and sorting on product lists
+
+---
+
+## 👨‍💻 Maintained By
+
+**Sai Krishna Mohan Kolla**  
+Full Stack Developer – MERN | AWS | CI/CD
