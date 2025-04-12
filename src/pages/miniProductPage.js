@@ -1,9 +1,11 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const MiniProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
   const flavorPrice = product.flavors?.[0]?.price;
   const price = flavorPrice !== undefined ? flavorPrice : product.price || 0;
@@ -46,23 +48,27 @@ const MiniProductCard = ({ product }) => {
         >
           {product.name}
         </Typography>
-        <Box display="flex" alignItems="center" gap={1}>
-          {product.isDeal && (
-            <>
-              <Typography variant="body2" sx={{ textDecoration: "line-through", color: "gray" }}>
+        {user && ( // ✅ Show prices only if user is logged in
+          <Box display="flex" alignItems="center" gap={1}>
+            {product.isDeal ? (
+              <>
+                <Typography
+                  variant="body2"
+                  sx={{ textDecoration: "line-through", color: "gray" }}
+                >
+                  ${price.toFixed(2)}
+                </Typography>
+                <Typography variant="body1" fontWeight="bold" color="green">
+                  ${finalPrice.toFixed(2)}
+                </Typography>
+              </>
+            ) : (
+              <Typography variant="body1" fontWeight="bold">
                 ${price.toFixed(2)}
               </Typography>
-              <Typography variant="body1" fontWeight="bold" color="green">
-                ${finalPrice.toFixed(2)}
-              </Typography>
-            </>
-          )}
-          {!product.isDeal && (
-            <Typography variant="body1" fontWeight="bold">
-              ${price.toFixed(2)}
-            </Typography>
-          )}
-        </Box>
+            )}
+          </Box>
+        )}
       </CardContent>
     </Card>
   );
