@@ -26,12 +26,13 @@ export const createProduct = createAsyncThunk(
 
 export const fetchProductsByCategory = createAsyncThunk(
   "products/fetchByCategory",
-  async ({ category, subCategories, sort, excludeId }, { rejectWithValue }) => {
+  async ({ category, subCategories, sort, excludeId, page = 1, limit = 12 }, { rejectWithValue }) => {
     try {
       let query = `${API_BASE_URL}/api/products/getProducts?category=${encodeURIComponent(category)}`;
       if (subCategories) query += `&subCategories=${encodeURIComponent(subCategories)}`;
       if (sort) query += `&sort=${sort}`;
       if (excludeId) query += `&excludeId=${excludeId}`;
+      query += `&page=${page}&limit=${limit}`;
 
       const { data } = await axios.get(query);
       console.log("Fetched Products:", data);
@@ -130,6 +131,9 @@ const productSlice = createSlice({
   name: "product",
   initialState: {
     products: [],
+    page: 1,
+    totalPages: 1,
+    totalProducts: 0,
     loading: false,
     error: null,
     selectedProduct: null,
@@ -143,6 +147,9 @@ const productSlice = createSlice({
       .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload.products || [];
+        state.page = action.payload.page || 1;
+        state.totalPages = action.payload.totalPages || 1;
+        state.totalProducts = action.payload.totalProducts || 0;
       })
       .addCase(fetchProductsByCategory.rejected, (state, action) => {
         state.loading = false;

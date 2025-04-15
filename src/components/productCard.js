@@ -87,13 +87,15 @@ const ProductCard = ({
       : fullDescription;
   const toggleReadMore = () => setReadMore(!readMore);
 
-  const hasFlavors = product.flavors && product.flavors.length > 0;
+  const originalFlavors = product.flavors && product.flavors.length > 0;
+  const hasFlavors = editFlavors && editFlavors.length > 0;
   const isIndividualPricing = hasFlavors && editFlavors.some((f) => f.price !== undefined && f.price !== null);
 
   const availableStock =
-    hasFlavors
-      ? product.flavors.find((f) => f.name === selectedFlavorForCart)?.stock || 0
-      : product.stock || 0;
+  (editFlavors && editFlavors.length > 0
+    ? editFlavors.find((f) => f.name === selectedFlavorForCart)?.stock
+    : product.flavors && product.flavors.find((f) => f.name === selectedFlavorForCart)?.stock) 
+  || product.stock || 0;
 
   const getDiscountedPrice = () => {
     let basePrice = 0;
@@ -183,6 +185,12 @@ const ProductCard = ({
     }
   };  
 
+  const handleDeleteFlavor = (idx) => {
+    const newFlavors = [...editFlavors];
+    newFlavors.splice(idx, 1);
+    setEditFlavors(newFlavors);
+  };  
+
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     setNewImages(files);
@@ -240,7 +248,7 @@ const ProductCard = ({
     } else {
       formData.append("price", editPrice);
       formData.append("stock", editStock);
-    }
+    }    
 
     newImages.forEach((file) => {
       formData.append("files", file);
@@ -491,7 +499,7 @@ const ProductCard = ({
                 onChange={handleFlavorChangeForCart}
                 label="Flavor"
               >
-                {product.flavors.map((f) => (
+                {(editFlavors && editFlavors.length > 0 ? editFlavors : product.flavors).map((f) => (
                   <MenuItem key={f.name} value={f.name}>
                     {f.name}
                   </MenuItem>
@@ -540,7 +548,7 @@ const ProductCard = ({
             rows={3}
             margin="dense"
           />
-          {hasFlavors ? (
+          {originalFlavors ? (
             <>
               <Typography mt={2} fontWeight="bold">
                 Flavors
@@ -581,7 +589,14 @@ const ProductCard = ({
                     }
                     sx={{ width: { xs: "100%", sm: 100 } }}
                   />
-                </Box>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDeleteFlavor(idx)}
+                    size="small"
+                  >
+                    <DeleteIcon />
+                  </IconButton> 
+                </Box>             
               ))}
               <Box mt={2}>
                 <Button variant="outlined" onClick={handleAddFlavor}>
