@@ -231,11 +231,17 @@ const Navbar = () => {
                   <Box
                     key={product._id}
                     onClick={() => {
-                      if (location.pathname !== `/product/${product._id}`) {
-                        navigate(`/product/${product._id}`);
+                      if (isAdmin) {
+                        navigate(
+                          `/category/${product.category}?highlight=${product._id}`
+                        );
+                      } else {
+                        if (location.pathname !== `/product/${product._id}`) {
+                          navigate(`/product/${product._id}`);
+                        }
                       }
-                      setSearchTerm("");
-                      setSearchResults([]);
+                        setSearchTerm("");
+                        setSearchResults([]);
                     }}
                     sx={{
                       px: 2,
@@ -322,4 +328,4 @@ const Navbar = () => {
   );  
 };
 
-export default React.memo(Navbar);
+export default Navbar;

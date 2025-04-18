@@ -13,7 +13,7 @@ import {
   InputLabel,
   Pagination,
 } from "@mui/material";
-import ProductCard from "../components/productCard";
+import ProductCard from "../components/productCard/productCard.js";
 import {
   fetchProductsByCategory,
   deleteProductById,
@@ -33,6 +33,7 @@ const CategoryProducts = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const highlightId = searchParams.get("highlight") || null;
   const initialPage = Number(searchParams.get("page")) || 1;
   const [currentPage, setCurrentPage] = useState(initialPage);
   const productsPerPage = 12;
@@ -45,11 +46,13 @@ const CategoryProducts = () => {
       prevFilters.current.subCategories !== subCategories ||
       prevFilters.current.sortOption !== sortOption
     ) {
+      const params = new URLSearchParams(searchParams);
+      params.set("page", "1");
       setCurrentPage(1);
-      setSearchParams({ page: "1" });
+      setSearchParams(params);
       prevFilters.current = { category, subCategories, sortOption };
     }
-  }, [category, subCategories, sortOption, setSearchParams]);
+  }, [category, subCategories, sortOption, searchParams, setSearchParams]);
 
   useEffect(() => {
     dispatch(
@@ -117,6 +120,17 @@ const CategoryProducts = () => {
   const { products, loading, error, totalPages } = useSelector((state) => state.product);
   console.log("Products:", products);
 
+  const displayedProducts = React.useMemo(() => {
+    if (!highlightId || products.length === 0) return products;
+    const list = [...products];
+    const idx = list.findIndex((p) => p._id === highlightId);
+    if (idx > 0) {
+      const [item] = list.splice(idx, 1);
+      list.unshift(item);
+    }
+    return list;
+  }, [products, highlightId]);
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       <Typography
@@ -154,11 +168,11 @@ const CategoryProducts = () => {
               <MenuItem value="popularity">Popularity</MenuItem>
             </Select>
           </FormControl>
-          {products.length === 0 ? (
+          {displayedProducts.length === 0 ? (
             <Typography textAlign="center">No products found</Typography>
           ) : (
             <Grid container spacing={3} alignItems="stretch">
-              {products.map((product) => (
+              {displayedProducts.map((product) => (
                 <Grid item key={product._id} xs={12} sm={12} md={6} lg={3}>
                   <Box
                     sx={{
@@ -166,7 +180,9 @@ const CategoryProducts = () => {
                       display: "flex",
                       flexDirection: "column",
                       transition: "transform 0.2s ease-in-out",
-                      "&:hover": { transform: "translateY(-4px)" },
+                      "&:hover": {
+                        transform: "translateY(-4px)",
+                      },
                     }}
                   >
                     <ProductCard

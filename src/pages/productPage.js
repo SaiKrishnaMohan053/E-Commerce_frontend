@@ -235,7 +235,6 @@ const ProductPage = () => {
                 </Box>
               ))}
 
-              {/* See More Card */}
               <Box
                 sx={{
                   minWidth: 160,

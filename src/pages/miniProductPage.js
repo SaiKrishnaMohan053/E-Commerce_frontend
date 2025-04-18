@@ -48,7 +48,7 @@ const MiniProductCard = ({ product }) => {
         >
           {product.name}
         </Typography>
-        {user && ( // ✅ Show prices only if user is logged in
+        {user && ( 
           <Box display="flex" alignItems="center" gap={1}>
             {product.isDeal ? (
               <>
