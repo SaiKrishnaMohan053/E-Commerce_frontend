@@ -140,7 +140,7 @@ const EditModal = ({
         <FormControl fullWidth margin="dense">
           <InputLabel>Is Deal?</InputLabel>
           <Select
-            value={product.isDeal ? "true" : "false"}
+            value={editIsDeal ? "true" : "false"}
             onChange={(e) =>
               setEditIsDeal(e.target.value === "true")
             }

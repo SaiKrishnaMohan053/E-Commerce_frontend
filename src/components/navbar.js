@@ -179,15 +179,14 @@ const Navbar = () => {
     <Box sx={{position: "relative"}}>
     <AppBar position="static" sx={{ backgroundColor: "#1976d2", py: 1 }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography
-          variant="h6"
-          sx={{ cursor: "pointer", fontWeight: "bold" }}
+      <Box
+          sx={{ width: 120, height: 40, cursor: "pointer" }}
           onClick={() => navigate("/")}
         >
-          C-Store & Novelty
-        </Typography>
+          <img src="" alt="Your Brand" style={{ width: 120, height: 40 }} />
+      </Box>
 
-        <Box sx={{ position: "relative", width: isMobile ? "45%" : "30%" }}>
+        <Box sx={{ position: "relative", width: isMobile ? "45%" : "30%", mx: "auto" }}>
           <TextField
             variant="outlined"
             size="small"
@@ -198,7 +197,6 @@ const Navbar = () => {
             sx={{
               backgroundColor: "white",
               borderRadius: 1,
-              zIndex: 1600,
               position: "relative",
             }}
             InputProps={{
@@ -325,7 +323,7 @@ const Navbar = () => {
           </Box>
         )}
       </Toolbar>
-      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)} PaperProps={{ sx: (theme) => ({ zIndex: theme.zIndex.drawer + 1})}}>
         {drawerContent}
       </Drawer>
     </AppBar>
