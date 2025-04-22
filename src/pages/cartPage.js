@@ -18,6 +18,8 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import SearchIcon from "@mui/icons-material/Search";
+import InputAdornment from "@mui/material/InputAdornment";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCart,
@@ -31,6 +33,7 @@ const CartPage = () => {
   const dispatch = useDispatch();
   const { items = [] } = useSelector((state) => state.cart);
 
+  const [searchTerm, setSearchTerm] = useState("");
   const [orderMethod, setOrderMethod] = useState("pickup");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
@@ -46,6 +49,15 @@ const CartPage = () => {
       .unwrap()
       .catch(() => alertSnackbar("Failed to load cart", "error"));
   }, [dispatch]);
+
+  const filteredItems = useMemo(() => {
+    if(!searchTerm) return items;
+    return items.filter(item => {
+      return item.productId.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+    })
+  }, [items, searchTerm]);
 
   const totalPrice = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.qty, 0),
@@ -91,18 +103,36 @@ const CartPage = () => {
       >
         Your Cart
       </Typography>
+      <Box mb={2} display="flex" justifyContent="center">
+        <TextField 
+          fullWidth
+          size="small"
+          sx={{ maxWidth: 400, "& .MuiInputBase-root": { height: 36 }  }}
+          label="search cart items"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small"/>
+              </InputAdornment>
+            )
+          }}
+        />
+      </Box>
 
-      {items.length === 0 ? (
+      {filteredItems.length === 0 ? (
         <Typography
           variant="body1"
           fontSize={{ xs: "0.875rem", sm: "1rem", md: "1.125rem", lg: "1.25rem" }}
         >
-          Your cart is empty.
+          {searchTerm ? `No items found for "${searchTerm}"` : "Your cart is empty."}
         </Typography>
       ) : (
         <>
-          <Box display="flex" flexDirection="column" gap={2}>
-            {items.map((item, index) => {
+          <Box display="flex" flexDirection="column" gap={2} alignItems="center">
+            {filteredItems.map((item, index) => {
               const image = item.productId?.images?.[0];
               const rawLimit = item.productId.purchaseLimit;
               const purchaseLimit = rawLimit && rawLimit > 0 ? rawLimit : Infinity;
