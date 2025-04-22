@@ -82,7 +82,7 @@ const CartPage = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Container maxWidth="md" sx={{ py: 4, px: { xs: 2, sm: 0 } }}>
       <Typography
         variant="h5"
         fontWeight="bold"
@@ -112,14 +112,18 @@ const CartPage = () => {
               return (
                 <Card
                   key={index}
+                  variant="outlined"
                   sx={{
                     display: "flex",
-                    flexDirection: "row",  // always row
+                    flexDirection: { xs: "column", sm: "row" },                   alignItems: { xs: "flex-start", sm: "center" },
                     alignItems: "center",
                     width: "100%",
+                    maxWidth: { xs: 360, sm: 700 },
+                    mx: "auto",
                     p: 1,
                     borderRadius: 2,
-                    boxShadow: 2
+                    boxShadow: 2,
+                    mb: 2,
                   }}                  
                 >
                   <CardMedia
@@ -127,8 +131,8 @@ const CartPage = () => {
                     image={imgSrc}
                     alt={item.productId?.name}
                     sx={{ 
-                      width: { xs: 56, sm: 70 },
-                      height: { xs:56, sm: 70 },
+                      width: { xs: 60, sm: 70 },
+                      height: { xs: 60, sm: 70 },
                       objectFit: "cover",
                       borderRadius: 1,
                       mr: { xs: 0, sm: 2 },
@@ -140,7 +144,7 @@ const CartPage = () => {
                       {item.productId?.name || "Unnamed Product"}
                     </Typography>
                     {item.flavor && (
-                      <Typography fontSize="0.8rem" color="text.secondary">
+                      <Typography fontSize="0.85rem" color="text.secondary">
                         Flavor: {item.flavor}
                       </Typography>
                     )}
@@ -185,15 +189,24 @@ const CartPage = () => {
                       </IconButton>
                     </Box>
                   </CardContent>
-                  <Typography fontWeight="bold" fontSize="1rem" pr={2} textAlign="right">
-                    ${(item.qty * item.price).toFixed(2)}
-                  </Typography>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleRemoveItem(item)}
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mt={2}
                   >
-                    <DeleteIcon />
-                  </IconButton>
+                    <Typography fontWeight="bold" fontSize="1rem">
+                      ${(item.qty * item.price).toFixed(2)}
+                    </Typography>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleRemoveItem(item)}
+                      size="large"
+                      sx={{ p: 1 }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
                 </Card>
               );
             })}
