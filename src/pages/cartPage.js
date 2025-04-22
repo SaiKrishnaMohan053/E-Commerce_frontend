@@ -113,15 +113,14 @@ const CartPage = () => {
                 <Card
                   key={index}
                   sx={{
-                    width: "100%",
-                    mx: "auto",
                     display: "flex",
-                    flexDirection: { xs: "column", sm: "row" },
-                    alignItems: { xs: "flex-start", sm: "center" },
-                    p: { xs: 0.5, sm: 1 },
+                    flexDirection: "row",  // always row
+                    alignItems: "center",
+                    width: "100%",
+                    p: 1,
                     borderRadius: 2,
-                    boxShadow: 2,
-                  }}
+                    boxShadow: 2
+                  }}                  
                 >
                   <CardMedia
                     component="img"
