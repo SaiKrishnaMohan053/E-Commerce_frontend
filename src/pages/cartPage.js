@@ -114,11 +114,11 @@ const CartPage = () => {
                   key={index}
                   sx={{
                     width: "100%",
-                    maxWidth: 700,
                     mx: "auto",
                     display: "flex",
-                    alignItems: "center",
-                    p: 1,
+                    flexDirection: { xs: "column", sm: "row" },
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    p: { xs: 0.5, sm: 1 },
                     borderRadius: 2,
                     boxShadow: 2,
                   }}
@@ -127,7 +127,14 @@ const CartPage = () => {
                     component="img"
                     image={imgSrc}
                     alt={item.productId?.name}
-                    sx={{ width: 70, height: 70, objectFit: "cover", borderRadius: 1, mr: 2 }}
+                    sx={{ 
+                      width: { xs: 56, sm: 70 },
+                      height: { xs:56, sm: 70 },
+                      objectFit: "cover",
+                      borderRadius: 1,
+                      mr: { xs: 0, sm: 2 },
+                      mb: { xs: 1, sm: 0 },
+                     }}
                   />
                   <CardContent sx={{ flex: 1, py: 1 }}>
                     <Typography fontWeight="bold" fontSize="1rem">
@@ -149,7 +156,7 @@ const CartPage = () => {
                         }
                         disabled={currentQty <= 1}
                       >
-                        <RemoveIcon />
+                        <RemoveIcon fontSize="inherit"/>
                       </IconButton>
                       <TextField
                         type="number"
@@ -179,7 +186,7 @@ const CartPage = () => {
                       </IconButton>
                     </Box>
                   </CardContent>
-                  <Typography fontWeight="bold" fontSize="1rem" pr={2}>
+                  <Typography fontWeight="bold" fontSize="1rem" pr={2} textAlign="right">
                     ${(item.qty * item.price).toFixed(2)}
                   </Typography>
                   <IconButton
