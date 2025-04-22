@@ -8,6 +8,7 @@ import ResetPassword from "./pages/resetpass";
 import Admin from "./pages/adminUser.js";
 import CategoryProductsPage from "./pages/categoryProductsPage.js";
 import ProductPage from "./pages/productPage.js";
+import CartPage from "./pages/cartPage.js";
 import Layout from "./components/layout";
 import PageLoader from "./components/loading.js";
 import SnackbarAlert from "./components/snackbarAlert.js";
@@ -84,6 +85,7 @@ const App = () => {
         <Route path="/category/:category/:subCategory" element={<CategoryProductsPage isAdmin={user?.isAdmin} />} />
         <Route path="/admin/add-product" element={isAdmin && <AddProduct />} />
         <Route path="/product/:id" element={<ProductPage />} />
+        <Route path="/cart" element={<CartPage />} />
       </Routes>
     </Layout>
   );

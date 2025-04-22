@@ -6,14 +6,21 @@ import {
   TextField,
   MenuItem,
   Button,
+  IconButton,
   useMediaQuery,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../store/slices/cartSlice";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { updateCartItem, removeCartItem } from "../store/slices/cartSlice";
 import { fetchSingleProduct, fetchProductsByCategory } from "../store/slices/productSlice";
 import MiniProductCard from "./miniProductPage";
 import ProductImages from "../components/productImg";
+import SnackbarAlert from "../components/snackbarAlert";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -22,10 +29,19 @@ const ProductPage = () => {
   const isMobile = useMediaQuery("(max-width:600px)");
   const { selectedProduct, loading } = useSelector((state) => state.product);
   const { user } = useSelector((state) => state.auth);
-
+  const cartItems = useSelector((state) => state.cart.items);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedFlavor, setSelectedFlavor] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
+  const alertSnackbar = (msg, sev = "success") => {
+    setSnackbarMsg(msg);
+    setSnackbarSeverity(sev);
+    setSnackbarOpen(true);
+  };
 
   useEffect(() => {
     if (id && id !== selectedProduct?._id) {
@@ -60,11 +76,21 @@ const ProductPage = () => {
     (flavor) => flavor.name === selectedFlavor
   );
 
+  const purchaseLimit = selectedProduct.purchaseLimit && selectedProduct.purchaseLimit > 0
+    ? selectedProduct.purchaseLimit
+    : Infinity;
+  const cartItem = cartItems.find(
+    it =>
+      it.productId._id === selectedProduct._id &&
+      (!selectedProduct.flavors?.length || it.flavor === selectedFlavor)
+  );
+  const qtyInCart = cartItem?.qty || 0;
+
   const basePrice =
   (flavorInfo?.price !== undefined ? flavorInfo.price : selectedProduct?.price) ?? 0;
 
     const finalPrice = selectedProduct?.isDeal
-    ? selectedProduct.discountType === "amount"
+    ? selectedProduct.discountType === "fixed"
         ? (parseFloat(basePrice) - parseFloat(selectedProduct.discountValue)).toFixed(2)
         : (parseFloat(basePrice) - (parseFloat(basePrice) * parseFloat(selectedProduct.discountValue)) / 100)
     : basePrice.toFixed(2);
@@ -73,6 +99,50 @@ const ProductPage = () => {
   ? flavorInfo?.stock === 0
   : selectedProduct.stock === 0;
 
+  const handleAddToCart = () => {
+    const price = selectedProduct.isDeal
+      ? parseFloat(finalPrice)
+      : parseFloat(basePrice);
+  
+    dispatch(addToCart({
+      productId: selectedProduct._id,
+      flavor: selectedFlavor || null,
+      qty: Number(quantity),
+      price: parseFloat(price)
+    }))
+      .unwrap()
+      .then(() => alertSnackbar("Product added to cart."))
+      .catch(() => alertSnackbar("Failed to add product to cart.", "error"));
+  }; 
+  
+  const handleInc = () =>
+    dispatch(updateCartItem({
+      productId: selectedProduct._id,
+      flavor: selectedFlavor || null,
+      qty: qtyInCart + 1
+    }));
+  
+  const handleDec = () => {
+    if (qtyInCart > 1) {
+      dispatch(updateCartItem({
+        productId: selectedProduct._id,
+        flavor: selectedFlavor || null,
+        qty: qtyInCart - 1
+      }));
+    } else {
+      dispatch(removeCartItem({
+        productId: selectedProduct._id,
+        flavor: selectedFlavor || null
+      }));
+    }
+  };
+  
+  const handleRemove = () => {
+    dispatch(removeCartItem({
+      productId: selectedProduct._id,
+      flavor: selectedFlavor || null
+    }));  
+  }
   return (
     <Box p={isMobile ? 2 : 4}>
       <Box
@@ -135,7 +205,7 @@ const ProductPage = () => {
                     🔥 Deal
                   </Box>
                   <Typography color="green" fontWeight="bold">
-                    {selectedProduct.discountType === "amount"
+                    {selectedProduct.discountType === "fixed"
                       ? `Special Deal: -$${selectedProduct.discountValue} Off`
                       : `Special Deal: -${selectedProduct.discountValue}% Off`}
                   </Typography>
@@ -167,6 +237,24 @@ const ProductPage = () => {
             </Typography>
           )}
 
+          {cartItem ? (
+            <Box display="flex" alignItems="center" gap={1} mt={2}>
+              <IconButton size="small" onClick={handleDec}>
+                {qtyInCart > 1
+                  && <RemoveIcon />}
+              </IconButton>
+
+              <Typography>{qtyInCart}</Typography>
+
+              <IconButton size="small" onClick={handleInc} disabled={qtyInCart >= purchaseLimit}>
+                <AddIcon />
+              </IconButton>
+
+              <IconButton size="small" onClick={handleRemove}>
+                <DeleteIcon color="error" />
+              </IconButton>
+            </Box>
+          ) : (
             <Box display="flex" alignItems="center" gap={2} mt={2}>
               <Box>
                 <Typography fontSize="14px">Quantity</Typography>
@@ -180,6 +268,7 @@ const ProductPage = () => {
                 />
               </Box>
               <Button
+                onClick={handleAddToCart}
                 variant="contained"
                 size="large"
                 startIcon={<ShoppingCartIcon />}
@@ -189,7 +278,12 @@ const ProductPage = () => {
                 {isOutOfStock ? "Out of Stock" : "ADD TO CART"}
               </Button>
             </Box>
-
+          )}
+          {purchaseLimit < Infinity && (
+            <Typography variant="caption" color="text.secondary">
+              {`Limit: ${purchaseLimit}`}
+            </Typography>
+          )}
             {!user && (
               <Typography fontSize="14px" mt={2} color="gray">
                 * Please login to see price details and purchase
@@ -274,6 +368,12 @@ const ProductPage = () => {
             </Box>
           )}
         </Box>
+        <SnackbarAlert
+          message={snackbarMsg}
+          severity={snackbarSeverity}
+          open={snackbarOpen}
+          setOpen={setSnackbarOpen}
+        />
     </Box>
   );
 };

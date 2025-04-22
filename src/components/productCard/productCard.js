@@ -12,16 +12,20 @@ import {
   MenuItem,
   TextField,
 } from "@mui/material";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { addToCart } from "../../store/slices/cartSlice";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import { updateCartItem, removeCartItem } from "../../store/slices/cartSlice";
 import ProductImages from "../productImg";
-
 import EditModal from "./editModal";
 import StockUpdateModal from "./stockUpdateModal";
 import DeleteModal from "./deleteModal";
+import SnackbarAlert from "../snackbarAlert";
 
 const ProductCard = ({
   product,
@@ -32,7 +36,18 @@ const ProductCard = ({
   onAddToCart,
 }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => Boolean(state.auth.user));
+  const cartItems = useSelector((state) => state.cart.items);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const alertSnackbar = (msg, sev = "success") => {
+    setSnackbarMsg(msg);
+    setSnackbarSeverity(sev);
+    setSnackbarOpen(true);
+  };
 
   const initializeEditValues = () => {
     setEditName(product.name);
@@ -77,6 +92,15 @@ const ProductCard = ({
   const [selectedFlavorForCart, setSelectedFlavorForCart] = useState(
     product.flavors?.[0]?.name || ""
   );
+  const purchaseLimit = product.purchaseLimit && product.purchaseLimit > 0
+    ? product.purchaseLimit
+    : Infinity;
+  const cartItem = cartItems.find(
+    (it) =>
+      it.productId._id === product._id &&
+      (!product.flavors?.length || it.flavor === selectedFlavorForCart)
+  );
+  const qty = cartItem?.qty || 0;
 
   const [editOpen, setEditOpen] = useState(false);
   const [stockOpen, setStockOpen] = useState(false);
@@ -313,16 +337,58 @@ const ProductCard = ({
   };
 
   const handleAddToCart = () => {
-    if (hasFlavors) {
-      onAddToCart(product, selectedFlavorForCart);
-    } else {
-      onAddToCart(product);
-    }
-  };
+    const qty = 1;
+    const flavor = hasFlavors ? selectedFlavorForCart : null;
+    const rawPrice = getDiscountedPrice() ??
+      (hasFlavors && isIndividualPricing
+        ? product.flavors.find((f) => f.name === selectedFlavorForCart)?.price
+        : product.price);
+  
+    const price = parseFloat(rawPrice);
+  
+    dispatch(addToCart({
+      productId: product._id,
+      flavor : flavor || null,
+      qty: Number(qty),
+      price: parseFloat(price)
+    }))
+      .unwrap()
+      .then(() => alertSnackbar("Product added to cart."))
+      .catch(() => alertSnackbar("Failed to add product to cart.", "error"));
+  };    
 
   const handleClick = () => {
     navigate(`/product/${product._id}`);
   };
+
+  const handleIncrease = () =>
+    dispatch(updateCartItem({
+      productId: product._id,
+      flavor: cartItem?.flavor,
+      qty: qty + 1
+    }));
+  
+  const handleDecrease = () => {
+    if (qty > 1) {
+      dispatch(updateCartItem({
+        productId: product._id,
+        flavor: cartItem?.flavor,
+        qty: qty - 1
+      }));
+    } else {
+      dispatch(removeCartItem({
+        productId: product._id,
+        flavor: cartItem?.flavor
+      }));
+    }
+  };
+  
+  const handleRemove = () => {
+    dispatch(removeCartItem({
+      productId: product._id,
+      flavor: cartItem?.flavor
+    }));  
+  }
 
   return (
     <Card
@@ -522,18 +588,48 @@ const ProductCard = ({
               </Select>
             </FormControl>
           )}
-          {Number(availableStock) === 0 ? (
-            <Button variant="contained" fullWidth disabled>
-              Out of Stock
-            </Button>
+          { cartItem ? (
+            <Box display="flex" alignItems="center" gap={1}>
+              <IconButton size="small" onClick={handleDecrease}>
+                { qty > 1 && <RemoveIcon /> }
+              </IconButton>
+
+              <TextField
+                value={qty}
+                size="small"
+                inputProps={{ readOnly: true, style: { textAlign: "center" } }}
+                sx={{ width: 50 }}
+              />
+
+              <IconButton
+                size="small"
+                onClick={handleIncrease}
+                disabled={qty >= purchaseLimit}
+              >
+                <AddIcon />
+              </IconButton>
+
+              <IconButton size="small" onClick={handleRemove}>
+                <DeleteIcon color="error" />
+              </IconButton>
+            </Box>
           ) : (
-            <Button variant="contained" fullWidth onClick={handleAddToCart}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleAddToCart}
+              disabled={Number(availableStock) === 0}
+            >
               Add to Cart
             </Button>
           )}
         </Box>
       )}
-
+      {purchaseLimit < Infinity && (
+        <Typography variant="caption" color="text.secondary">
+          {`Limit: ${purchaseLimit}`}
+        </Typography>
+      )}
       <EditModal
         open={editOpen}
         handleClose={() => setEditOpen(false)}
@@ -581,6 +677,13 @@ const ProductCard = ({
         handleClose={() => setDeleteOpen(false)}
         product={product}
         handleConfirmDelete={handleConfirmDelete}
+      />
+
+      <SnackbarAlert
+        message={snackbarMsg}
+        severity={snackbarSeverity}
+        open={snackbarOpen}
+        setOpen={setSnackbarOpen}
       />
     </Card>
   );

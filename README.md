@@ -1,4 +1,3 @@
-
 # E-Commerce - Frontend
 
 This is frontend e-commerce web application. It is built using React.js and supports both regular users and administrators with features such as user registration, login, profile, admin panel, user management, and product management.
@@ -14,6 +13,15 @@ This is frontend e-commerce web application. It is built using React.js and supp
 - View related products on product detail page
 - Deal badge with price strike-through and discount info
 - Product pagination, search, and category filtering
+- **Add to Cart functionality**
+  - Support for flavored and non-flavored products
+  - Quantity selector with purchase limit validation
+  - Quantity updates for performance
+- **Cart Page**
+  - View items with price & quantity breakdown
+  - Inline quantity editing and remove buttons
+  - Clear entire cart option
+  - Pick-up or delivery selection before placing order
 - Responsive design with mobile support
 - Snackbar notifications for user feedback
 
@@ -37,6 +45,8 @@ This is frontend e-commerce web application. It is built using React.js and supp
 - Smooth image display with zoom and multiple views
 - Horizontal scrollable related product section
 
+---
+
 ## Tech Stack
 
 - **React.js** - Component-based frontend framework
@@ -52,8 +62,8 @@ This is frontend e-commerce web application. It is built using React.js and supp
 
 ## Upcoming Features
 
-- Cart functionality and live updates
 - Wishlist and order tracking
+- Invoice upload and management for completed orders
 - Admin dashboard analytics
 
 ---

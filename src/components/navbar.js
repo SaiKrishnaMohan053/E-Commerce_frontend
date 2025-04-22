@@ -34,6 +34,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { logoutUser } from "../store/slices/authSlice.js";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { fetchCart } from "../store/slices/cartSlice.js";
 
 const Navbar = () => {
   const theme = useTheme();
@@ -46,6 +47,12 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchCart());
+    }
+  }, [dispatch, user]);
 
   useEffect(() => {
     const delaySearch = setTimeout(async () => {
@@ -172,20 +179,13 @@ const Navbar = () => {
     <Box sx={{position: "relative"}}>
     <AppBar position="static" sx={{ backgroundColor: "#1976d2", py: 1 }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {isMobile && (
-            <IconButton color="inherit" edge="start" onClick={toggleDrawer(true)}>
-              <MenuIcon />
-            </IconButton>
-          )}
-          <Typography
-            variant="h6"
-            sx={{ cursor: "pointer", fontWeight: "bold" }}
-            onClick={() => navigate("/")}
-          >
-            C-Store & Novelty
-          </Typography>
-        </Box>
+        <Typography
+          variant="h6"
+          sx={{ cursor: "pointer", fontWeight: "bold" }}
+          onClick={() => navigate("/")}
+        >
+          C-Store & Novelty
+        </Typography>
 
         <Box sx={{ position: "relative", width: isMobile ? "45%" : "30%" }}>
           <TextField
@@ -273,6 +273,11 @@ const Navbar = () => {
             </Box>
           )}
         </Box>
+        {isMobile && (
+            <IconButton color="inherit" edge="start" onClick={toggleDrawer(true)}>
+              <MenuIcon />
+            </IconButton>
+          )}
         {!isMobile && (
           <Box sx={{ display: "flex", alignItems: "center" }}>
             {isAdmin ? (
@@ -320,7 +325,7 @@ const Navbar = () => {
           </Box>
         )}
       </Toolbar>
-      <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
         {drawerContent}
       </Drawer>
     </AppBar>
