@@ -584,18 +584,33 @@ const ProductCard = ({
           )}
           { cartItem ? (
             <Box display="flex" alignItems="center" gap={1}>
-              <IconButton size="small" onClick={handleDecrease}>
+              <IconButton type="button" size="small" onClick={handleDecrease}>
                 { qty > 1 && <RemoveIcon /> }
               </IconButton>
 
               <TextField
+                type="number"
                 value={qty}
                 size="small"
-                inputProps={{ readOnly: true, style: { textAlign: "center" } }}
-                sx={{ width: 50 }}
+                onChange={(e) => {
+                  let v = Number(e.target.value) || 1;
+                  v = Math.max(1, Math.min(purchaseLimit, v));
+                  dispatch(updateCartItem({
+                    productId: product._id,
+                    flavor: cartItem.flavor,
+                    qty: v
+                  }));
+                }}
+                inputProps={{
+                  min: 1,
+                  max: purchaseLimit === Infinity ? undefined : purchaseLimit,
+                  style: { textAlign: "center" },
+                }}
+                sx={{ width: 60 }}
               />
 
               <IconButton
+                type="button"
                 size="small"
                 onClick={handleIncrease}
                 disabled={qty >= purchaseLimit}
@@ -603,12 +618,13 @@ const ProductCard = ({
                 <AddIcon />
               </IconButton>
 
-              <IconButton size="small" onClick={handleRemove}>
+              <IconButton type="button" size="small" onClick={handleRemove}>
                 <DeleteIcon color="error" />
               </IconButton>
             </Box>
           ) : (
             <Button
+              type="button"
               variant="contained"
               fullWidth
               onClick={handleAddToCart}

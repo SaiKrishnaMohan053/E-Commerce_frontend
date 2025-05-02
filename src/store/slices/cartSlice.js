@@ -8,7 +8,9 @@ const API_BASE_URL =
 const initialState = {
   items: [],
   totalItems: 0,
-  loading: false,
+  fetchLoading: false,
+  updateLoading: false,
+  removeLoading: false,
   error: null,
 };
 
@@ -117,16 +119,16 @@ const cartSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchCart.pending, (state) => {
-        state.loading = true;
+        state.fetchLoading = true;
         state.error = null;
       })
       .addCase(fetchCart.fulfilled, (state, { payload }) => {
-        state.loading = false;
+        state.fetchLoading = false;
         state.items = payload.items || [];
         state.totalItems = state.items.reduce((sum, i) => sum + i.qty, 0);
       })
       .addCase(fetchCart.rejected, (state, action) => {
-        state.loading = false;
+        state.fetchLoading = false;
         state.error = action.payload || {message: "Failed to fetch cart"};
       })
       .addCase(addToCart.pending, (state) => {
@@ -143,29 +145,29 @@ const cartSlice = createSlice({
         state.error = action.payload || { message: "Failed to add to cart" };
       })
       .addCase(updateCartItem.pending, (state) => {
-        state.loading = true;
+        state.updateLoading = true;
         state.error = null;
       })
       .addCase(updateCartItem.fulfilled, (state, { payload }) => {
-        state.loading = false;
+        state.updateLoading = false;
         state.items = payload.items || [];
         state.totalItems = state.items.reduce((sum, i) => sum + i.qty, 0);
       })
       .addCase(updateCartItem.rejected, (state, action) => {
-        state.loading = false;
+        state.updateLoading = false;
         state.error = action.payload || { message: "Failed to update cart item" };
       })
       .addCase(removeCartItem.pending, (state) => {
-        state.loading = true;
+        state.removeLoading = true;
         state.error = null;
       })
       .addCase(removeCartItem.fulfilled, (state, { payload }) => {
-        state.loading = false;
+        state.removeLoading = false;
         state.items = payload.items || [];
         state.totalItems = state.items.reduce((sum, i) => sum + i.qty, 0);
       })
       .addCase(removeCartItem.rejected, (state, action) => {
-        state.loading = false;
+        state.removeLoading = false;
         state.error = action.payload || { message: "Failed to remove cart item" };
       })
       .addCase(clearCart.pending, (state) => {

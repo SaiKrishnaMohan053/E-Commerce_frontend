@@ -31,7 +31,7 @@ import { showAlert } from "../../store/slices/alertSlice";
 const CartPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { items = [], loading } = useSelector((state) => state.cart);
+  const { items = [], fetchLoading } = useSelector((state) => state.cart);
 
   const [searchTerm, setSearchTerm] = useState("");
   
@@ -55,7 +55,7 @@ const CartPage = () => {
     [items]
   );
 
-  if (loading) {
+  if (fetchLoading) {
     return (
       <Container maxWidth="md" sx={{ py: 4, px: { xs: 2, sm: 0 } }}>
         <Skeleton variant="text" width="30%" height={40} />
@@ -193,8 +193,8 @@ const CartPage = () => {
                       mb: { xs: 1, sm: 0 },
                      }}
                   />
-                  <CardContent sx={{ flex: 1, py: 1 }}>
-                    <Typography fontWeight="bold" fontSize="1rem">
+                  <CardContent sx={{ flex: 1, py: 1, display: "flex", flexDirection: "column", alignItems: { xs: "center", sm: "flex-start" } }}>
+                    <Typography fontWeight="bold" fontSize="1rem" sx={{ cursor: "pointer" }} onClick={() => navigate(`/product/${item.productId._id}`)}>
                       {item.productId?.name || "Unnamed Product"}
                     </Typography>
                     {item.flavor && (
@@ -205,8 +205,9 @@ const CartPage = () => {
                     <Typography fontSize="0.9rem" color="text.secondary">
                       Price: ${item.price.toFixed(2)}
                     </Typography>
-                    <Box display="flex" alignItems="center" gap={1} mt={1}>
+                    <Box display="flex" alignItems="center" justifyContent="center" gap={1} mt={1} width="100%">
                       <IconButton
+                        type="button"
                         size="small"
                         onClick={() =>
                           handleQuantityChange(item, Math.max(1, currentQty - 1))
@@ -220,10 +221,9 @@ const CartPage = () => {
                         size="small"
                         value={currentQty}
                         onChange={(e) => {
-                          let v = Number(e.target.value);
-                          if (v < 1) v = 1;
-                          if (v > purchaseLimit) v = purchaseLimit;
-                          handleQuantityChange(item, v);
+                          let v = Number(e.target.value) || 0;
+                          const newQty = Math.min(Math.max(v, 1), purchaseLimit)
+                          handleQuantityChange(item, newQty);
                         }}
                         inputProps={{
                           min: 1,

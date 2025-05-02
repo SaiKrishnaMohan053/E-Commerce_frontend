@@ -167,10 +167,20 @@ const OrderDetailPage = () => {
       <List>
         {order.orderItems.map((item) => (
           <ListItemButton key={item._id} disableGutters>
-            <ListItemText
-              primary={`${item.name} x ${item.qty} = $${(item.qty * item.price).toFixed(2)}`}
-              secondary={item.flavor ? `Flavor: ${item.flavor}` : null}
-            />
+            <Box display="flex" alignItems="center" width="100%">
+              <Box
+                component="img"
+                src={item.product?.images[0]?.url || "/placeholder.png"}
+                alt={item.name}
+                sx={{ width: 60, height: 60, objectFit: "cover", mr: 2, borderRadius: 1 }}
+              />
+              <ListItemText
+                primary={`${item.name} x ${item.qty} = $${(
+                  item.qty * item.price
+                ).toFixed(2)}`}
+                secondary={item.flavor ? `Flavor: ${item.flavor}` : null}
+              />
+            </Box>
           </ListItemButton>
         ))}
       </List>

@@ -56,22 +56,50 @@ const ProductPage = () => {
     }
   }, [dispatch, selectedProduct]);  
 
-  useEffect(() => {
-    if (selectedProduct?.flavors && selectedProduct.flavors.length > 0) {
-      setSelectedFlavor(selectedProduct.flavors[0]?.name || "");
-    }
-  }, [selectedProduct]);
+  const sortedFlavors = React.useMemo(() => {
+    return Array.isArray(selectedProduct?.flavors)
+      ? [...selectedProduct.flavors].sort((a, b) =>
+          a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+        )
+      : [];
+  }, [selectedProduct?.flavors]);
 
-  const flavorInfo = selectedProduct.flavors?.find(
+  useEffect(() => {
+    if (sortedFlavors.length > 0) {
+      setSelectedFlavor(sortedFlavors[0].name);
+    }
+  }, [sortedFlavors]);
+
+  if (loading || !selectedProduct) {
+    return (
+      <Box p={isMobile ? 2 : 4}>
+        <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={4}>
+          <Box width={isMobile ? "100%" : "50%"}>
+            <Skeleton variant="rectangular" width="100%" height={isMobile ? 200 : 300} />
+          </Box>
+          <Box width={isMobile ? "100%" : "40%"}>
+            <Skeleton variant="text" width="60%" height={40} />
+            <Skeleton variant="text" width="80%" />
+            <Box display="flex" gap={2} mt={2}>
+              <Skeleton variant="rectangular" width={120} height={40} />
+              <Skeleton variant="rectangular" width={120} height={40} />
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+
+  const flavorInfo = selectedProduct?.flavors?.find(
     (flavor) => flavor.name === selectedFlavor
   );
 
-  const purchaseLimit = selectedProduct.purchaseLimit && selectedProduct.purchaseLimit > 0
+  const purchaseLimit = selectedProduct?.purchaseLimit > 0
     ? selectedProduct.purchaseLimit
     : Infinity;
   const cartItem = cartItems.find(
     it =>
-      it.productId._id === selectedProduct._id &&
+      it.productId._id === selectedProduct?._id &&
       (!selectedProduct.flavors?.length || it.flavor === selectedFlavor)
   );
   const qtyInCart = cartItem?.qty || 0;
@@ -133,26 +161,6 @@ const ProductPage = () => {
       flavor: selectedFlavor || null
     }));  
   }
-
-  if (loading || !selectedProduct) {
-    return (
-      <Box p={isMobile ? 2 : 4}>
-        <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={4}>
-          <Box width={isMobile ? "100%" : "50%"}>
-            <Skeleton variant="rectangular" width="100%" height={isMobile ? 200 : 300} />
-          </Box>
-          <Box width={isMobile ? "100%" : "40%"}>
-            <Skeleton variant="text" width="60%" height={40} />
-            <Skeleton variant="text" width="80%" />
-            <Box display="flex" gap={2} mt={2}>
-              <Skeleton variant="rectangular" width={120} height={40} />
-              <Skeleton variant="rectangular" width={120} height={40} />
-            </Box>
-          </Box>
-        </Box>
-      </Box>
-    );
-  }
   
   return (
     <Box p={isMobile ? 2 : 4}>
@@ -175,7 +183,7 @@ const ProductPage = () => {
             {selectedProduct.description}
           </Typography>
 
-          {selectedProduct.flavors && selectedProduct.flavors.length > 0 && (
+          { sortedFlavors.length > 0 && (
             <Box mb={2}>
               <Typography fontSize="14px" mb={0.5}>
                 Flavor
@@ -187,7 +195,7 @@ const ProductPage = () => {
                 value={selectedFlavor}
                 onChange={(e) => setSelectedFlavor(e.target.value)}
               >
-                {selectedProduct.flavors.map((flavor) => (
+                {sortedFlavors.map((flavor) => (
                   <MenuItem key={flavor.name} value={flavor.name}>
                     {flavor.name}
                   </MenuItem>
@@ -250,18 +258,37 @@ const ProductPage = () => {
 
           {cartItem ? (
             <Box display="flex" alignItems="center" gap={1} mt={2}>
-              <IconButton size="small" onClick={handleDec}>
+              <IconButton type="button" size="small" onClick={handleDec}>
                 {qtyInCart > 1
                   && <RemoveIcon />}
               </IconButton>
 
-              <Typography>{qtyInCart}</Typography>
+              <TextField
+                type="number"
+                size="small"
+                value={qtyInCart}
+                onChange={(e) => {
+                  let v = Number(e.target.value) || 1;
+                  v = Math.max(1, Math.min(purchaseLimit, v));
+                  dispatch(updateCartItem({
+                    productId: selectedProduct._id,
+                    flavor: selectedFlavor || null,
+                    qty: v
+                  }));
+                }}
+                inputProps={{
+                  min: 1,
+                  max: purchaseLimit === Infinity ? undefined : purchaseLimit,
+                  style: { textAlign: "center" },
+                }}
+                sx={{ width: 60 }}
+              />
 
-              <IconButton size="small" onClick={handleInc} disabled={qtyInCart >= purchaseLimit}>
+              <IconButton type="button" size="small" onClick={handleInc} disabled={qtyInCart >= purchaseLimit}>
                 <AddIcon />
               </IconButton>
 
-              <IconButton size="small" onClick={handleRemove}>
+              <IconButton type="button" size="small" onClick={handleRemove}>
                 <DeleteIcon color="error" />
               </IconButton>
             </Box>
@@ -273,12 +300,13 @@ const ProductPage = () => {
                   type="number"
                   size="small"
                   value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
+                  onChange={(e) => setQuantity(Number(e.target.value))}
                   inputProps={{ min: 1 }}
                   sx={{ width: "80px" }}
                 />
               </Box>
               <Button
+                type="button"
                 onClick={handleAddToCart}
                 variant="contained"
                 size="large"
