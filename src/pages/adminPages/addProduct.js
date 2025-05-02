@@ -13,12 +13,13 @@ import {
   FormControl,
   Grid,
 } from "@mui/material";
-import { createProduct } from "../store/slices/productSlice";
 import { useDispatch } from "react-redux";
-import SnackbarAlert from "../components/snackbarAlert";
+
+import { createProduct } from "../../store/slices/productSlice";
+import { showAlert } from "../../store/slices/alertSlice";
 
 const AddProduct = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
@@ -33,9 +34,6 @@ const AddProduct = () => {
   const [price, setPrice] = useState(0);
   const [files, setFiles] = useState([]);
   const [isIndividualPricing, setIsIndividualPricing] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-    const [snackbarMessage, setSnackbarMessage] = useState("");
-    const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const handleFlavorChange = (index, field, value) => {
     const newFlavors = [...flavors];
@@ -70,21 +68,15 @@ const AddProduct = () => {
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      setSnackbarMessage("Product name is required");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+      dispatch(showAlert({ message: "Product name is required", severity: "error" }));
       return;
     }
     if (!category.trim()) {
-      setSnackbarMessage("Category is required");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+      dispatch(showAlert({ message: "Category is required", severity: "error" }));
       return;
     }
     if (!description.trim()) {
-      setSnackbarMessage("Description is required");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
+      dispatch(showAlert({ message: "Description is required", severity: "error" }));
       return;
     }    
 
@@ -115,15 +107,10 @@ const AddProduct = () => {
 
     try {
         await dispatch(createProduct(formData)).unwrap();
-        setSnackbarMessage("Product added successfully!");
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
+        dispatch(showAlert({ message: "Product added successfully!", severity: "success" }));
         resetForm();
       } catch (err) {
-        console.error("Product creation failed:", err);
-        setSnackbarMessage("Failed to add product");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
+        dispatch(showAlert({ message: "Failed to add product", severity: "error" }));
       }
   };
 
@@ -268,13 +255,6 @@ const AddProduct = () => {
       <Button variant="contained" color="primary" fullWidth sx={{ mt: 3 }} onClick={handleSubmit}>
         Add Product
       </Button>
-
-      <SnackbarAlert
-        open={snackbarOpen}
-        setOpen={setSnackbarOpen}
-        message={snackbarMessage}
-        severity={snackbarSeverity}
-        />
     </Container>
   );
 };

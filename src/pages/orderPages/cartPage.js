@@ -10,10 +10,7 @@ import {
   Button,
   Divider,
   Container,
-  FormControl,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
+  Skeleton,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -21,33 +18,27 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import SearchIcon from "@mui/icons-material/Search";
 import InputAdornment from "@mui/material/InputAdornment";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 import {
   fetchCart,
   updateCartItem,
   removeCartItem,
   clearCart,
-} from "../store/slices/cartSlice";
-import SnackbarAlert from "../components/snackbarAlert";
+} from "../../store/slices/cartSlice";
+import { showAlert } from "../../store/slices/alertSlice";
 
 const CartPage = () => {
   const dispatch = useDispatch();
-  const { items = [] } = useSelector((state) => state.cart);
+  const navigate = useNavigate();
+  const { items = [], loading } = useSelector((state) => state.cart);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [orderMethod, setOrderMethod] = useState("pickup");
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const alertSnackbar = (msg, sev = "success") => {
-    setSnackbarMsg(msg);
-    setSnackbarSeverity(sev);
-    setSnackbarOpen(true);
-  };
-
+  
   useEffect(() => {
     dispatch(fetchCart())
       .unwrap()
-      .catch(() => alertSnackbar("Failed to load cart", "error"));
+      .catch(() => dispatch(showAlert({ message: "Failed to load cart", severity: "error" })));
   }, [dispatch]);
 
   const filteredItems = useMemo(() => {
@@ -64,6 +55,39 @@ const CartPage = () => {
     [items]
   );
 
+  if (loading) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4, px: { xs: 2, sm: 0 } }}>
+        <Skeleton variant="text" width="30%" height={40} />
+        <Box mb={2} mt={2}>
+          <Skeleton variant="rectangular" width="100%" height={36} />
+        </Box>
+        {Array.from({ length: 3 }).map((_, idx) => (
+          <Card
+            key={idx}
+            variant="outlined"
+            sx={{ mb: 2, p: 1, borderRadius: 2, boxShadow: 2 }}
+          >
+            <Box display="flex" gap={2} alignItems="center">
+              <Skeleton variant="rectangular" width={60} height={60} />
+              <Box flexGrow={1}>
+                <Skeleton variant="text" width="40%" />
+                <Skeleton variant="text" width="30%" />
+                <Skeleton variant="rectangular" width={80} height={24} sx={{ mt: 1 }} />
+              </Box>
+              <Skeleton variant="text" width={60} />
+            </Box>
+          </Card>
+        ))}
+        <Divider sx={{ my: 3 }} />
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Skeleton variant="text" width="20%" height={32} />
+          <Skeleton variant="rectangular" width={120} height={36} />
+        </Box>
+      </Container>
+    );
+  }
+
   const handleQuantityChange = (item, newQty) => {
     dispatch(
       updateCartItem({
@@ -73,8 +97,8 @@ const CartPage = () => {
       })
     )
       .unwrap()
-      .then(() => alertSnackbar("Quantity updated"))
-      .catch(() => alertSnackbar("Failed to update quantity", "error"));
+      .then(() => dispatch(showAlert({ message: "Quantity updated", severity: "success" })))
+      .catch(() => dispatch(showAlert({ message: "Failed to update quantity", severity: "error"})));
   };
 
   const handleRemoveItem = (item) => {
@@ -82,17 +106,17 @@ const CartPage = () => {
       removeCartItem({ productId: item.productId._id, flavor: item.flavor })
     )
       .unwrap()
-      .then(() => alertSnackbar("Item removed"))
-      .catch(() => alertSnackbar("Failed to remove item", "error"));
+      .then(() => dispatch(showAlert({ message: "Item removed", severity: "success" })))
+      .catch(() => dispatch(showAlert({ message: "Failed to remove item", severity: "error" })));
   };
 
   const handleClearCart = () => {
     dispatch(clearCart())
       .unwrap()
-      .then(() => alertSnackbar("Cart cleared"))
-      .catch(() => alertSnackbar("Failed to clear cart", "error"));
+      .then(() => dispatch(showAlert({ message: "Cart cleared", severity: "success" })))
+      .catch(() => dispatch(showAlert({ message: "Failed to clear cart", severity: "error" })));
   };
-
+ 
   return (
     <Container maxWidth="md" sx={{ py: 4, px: { xs: 2, sm: 0 } }}>
       <Typography
@@ -137,7 +161,7 @@ const CartPage = () => {
               const rawLimit = item.productId.purchaseLimit;
               const purchaseLimit = rawLimit && rawLimit > 0 ? rawLimit : Infinity;
               const currentQty = item.qty;
-              const imgSrc = image?.url || "image.png";
+              const imgSrc = image?.url || "image.png" || null;
 
               return (
                 <Card
@@ -158,7 +182,7 @@ const CartPage = () => {
                 >
                   <CardMedia
                     component="img"
-                    image={imgSrc}
+                    image={imgSrc || null}
                     alt={item.productId?.name}
                     sx={{ 
                       width: { xs: 60, sm: 70 },
@@ -252,48 +276,18 @@ const CartPage = () => {
               Clear Cart
             </Button>
           </Box>
-
-          <Box mt={4} maxWidth={400} mx="auto">
-            <FormControl component="fieldset" fullWidth>
-              <RadioGroup
-                row
-                name="order-method"
-                value={orderMethod}
-                onChange={(e) => setOrderMethod(e.target.value)}
-              >
-                <FormControlLabel
-                  value="pickup"
-                  control={<Radio />}
-                  label="Pick Up"
-                />
-                <FormControlLabel
-                  value="delivery"
-                  control={<Radio />}
-                  label="Delivery"
-                />
-              </RadioGroup>
-            </FormControl>
-
-            <Box display="flex" justifyContent="center" mt={2}>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => {
-                  console.log("Placing order with method:", orderMethod);
-                }}
-              >
-                Place Order
-              </Button>
-            </Box>
+          <Box display="flex" justifyContent="flex-end" mt={2}>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => navigate('/checkout')}
+              disabled={items.length === 0}
+            >
+              Proceed to Checkout
+            </Button>
           </Box>
         </>
       )}
-      <SnackbarAlert
-        message={snackbarMsg}
-        severity={snackbarSeverity}
-        open={snackbarOpen}
-        setOpen={setSnackbarOpen}
-      />
     </Container>
   );
 };

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUserProfile, updateUserProfile } from "../store/slices/authSlice";
 import {
   TextField,
   Button,
@@ -11,14 +10,16 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import SnackbarAlert from "../components/snackbarAlert.js";
+
+import { fetchUserProfile, updateUserProfile } from "../../store/slices/authSlice";
+import { showAlert } from "../../store/slices/alertSlice";
 
 const Profile = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const dispatch = useDispatch();
   const { user, loading } = useSelector((state) => state.auth);
+
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     ownerName: "",
@@ -27,10 +28,6 @@ const Profile = () => {
     phoneNumber: "",
     address: "",
   });
-
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("success");
 
   useEffect(() => {
     dispatch(fetchUserProfile());
@@ -67,23 +64,17 @@ const Profile = () => {
   const handleUpdate = async () => {
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(formData.phoneNumber)) {
-      setAlertMessage("Please enter a valid 10-digit phone number.");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Please enter a valid phone number.", severity: "error" }));
       return;
     }
 
     const resultAction = await dispatch(updateUserProfile(formData));
 
     if (updateUserProfile.fulfilled.match(resultAction)) {
-      setAlertMessage("Profile updated successfully!");
-      setAlertSeverity("success");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Profile updated successfully!", severity: "success" }));
       setEditMode(false);
     } else {
-      setAlertMessage("Profile update failed!");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Failed to update profile. Please try again.", severity: "error" }));
     }
   };
 
@@ -101,13 +92,6 @@ const Profile = () => {
       <Typography variant="h4" textAlign="center" mb={3} fontWeight="bold">
         Profile
       </Typography>
-
-      <SnackbarAlert
-        open={alertOpen}
-        setOpen={setAlertOpen}
-        severity={alertSeverity}
-        message={alertMessage}
-      />
 
       {loading ? (
         <CircularProgress />

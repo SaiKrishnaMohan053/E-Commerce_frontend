@@ -14,18 +14,17 @@ import {
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { addToCart } from "../../store/slices/cartSlice";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
-import { updateCartItem, removeCartItem } from "../../store/slices/cartSlice";
+
+import { addToCart,updateCartItem, removeCartItem } from "../../store/slices/cartSlice";
 import ProductImages from "../productImg";
 import EditModal from "./editModal";
 import StockUpdateModal from "./stockUpdateModal";
 import DeleteModal from "./deleteModal";
-import SnackbarAlert from "../snackbarAlert";
 
 const ProductCard = ({
   product,
@@ -33,40 +32,32 @@ const ProductCard = ({
   onEdit,
   onUpdateStock,
   onDelete,
-  onAddToCart,
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => Boolean(state.auth.user));
   const cartItems = useSelector((state) => state.cart.items);
 
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-  const alertSnackbar = (msg, sev = "success") => {
-    setSnackbarMsg(msg);
-    setSnackbarSeverity(sev);
-    setSnackbarOpen(true);
-  };
-
-  const initializeEditValues = () => {
-    setEditName(product.name);
-    setEditDescription(product.description);
-    setEditPrice(product.price || 0);
-    setEditStock(product.stock || 0);
-    setEditIsDeal(product.isDeal || false);
-    setEditLimit(product.purchaseLimit || 0);
-    setEditDiscountType(product.discountType || "");
-    setEditDiscountValue(product.discountValue || 0);
-    setEditFlavors(
-      product.flavors ? JSON.parse(JSON.stringify(product.flavors)) : []
-    );
-    setNewImages([]);
-  };
-
+  const sortFlavorsAZ = (flavors = []) =>
+    [...flavors].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    ); 
   const initialFlavors = product.flavors
-    ? JSON.parse(JSON.stringify(product.flavors))
+    ? sortFlavorsAZ(product.flavors)
     : [];
+  const [selectedFlavorForCart, setSelectedFlavorForCart] = useState(
+    product.flavors?.[0]?.name || ""
+  );
+  const purchaseLimit = product.purchaseLimit && product.purchaseLimit > 0
+    ? product.purchaseLimit
+    : Infinity;
+  const cartItem = cartItems.find(
+    (it) =>
+      it.productId._id === product._id &&
+      (!product.flavors?.length || it.flavor === selectedFlavorForCart)
+  );
+  const qty = cartItem?.qty || 0;
+
   const [editFlavors, setEditFlavors] = useState(initialFlavors);
   const [editName, setEditName] = useState(product.name);
   const [editDescription, setEditDescription] = useState(product.description);
@@ -88,25 +79,24 @@ const ProductCard = ({
   const [newStock, setNewStock] = useState(
     initialFlavors[0]?.stock || product.stock || 0
   );
-
-  const [selectedFlavorForCart, setSelectedFlavorForCart] = useState(
-    product.flavors?.[0]?.name || ""
-  );
-  const purchaseLimit = product.purchaseLimit && product.purchaseLimit > 0
-    ? product.purchaseLimit
-    : Infinity;
-  const cartItem = cartItems.find(
-    (it) =>
-      it.productId._id === product._id &&
-      (!product.flavors?.length || it.flavor === selectedFlavorForCart)
-  );
-  const qty = cartItem?.qty || 0;
-
   const [editOpen, setEditOpen] = useState(false);
   const [stockOpen, setStockOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-
   const [readMore, setReadMore] = useState(false);
+
+  const initializeEditValues = () => {
+    setEditName(product.name);
+    setEditDescription(product.description);
+    setEditPrice(product.price || 0);
+    setEditStock(product.stock || 0);
+    setEditIsDeal(product.isDeal || false);
+    setEditLimit(product.purchaseLimit || 0);
+    setEditDiscountType(product.discountType || "");
+    setEditDiscountValue(product.discountValue || 0);
+    setEditFlavors(sortFlavorsAZ(product.flavors));
+    setNewImages([]);
+  };
+
   const DESCRIPTION_LIMIT = 50;
   const fullDescription = product.description || "";
   const shortDescription =
@@ -150,74 +140,6 @@ const ProductCard = ({
     return null;
   };
 
-  const renderPrice = () => {
-    const discounted = getDiscountedPrice();
-    const flavorName = isAdmin ? selectedFlavorForStock : selectedFlavorForCart;
-    const flavorPrice =
-      hasFlavors && isIndividualPricing
-        ? product.flavors.find((f) => f.name === flavorName)?.price
-        : null;
-    const basePrice =
-      flavorPrice !== null && flavorPrice !== undefined
-        ? parseFloat(flavorPrice)
-        : parseFloat(editPrice);
-
-    if (discounted !== null && discounted < basePrice) {
-      const discountLabel =
-        product.discountType === "percent"
-          ? `(-${product.discountValue}%)`
-          : `(-$${parseFloat(product.discountValue).toFixed(2)})`;
-
-      return (
-        <Box display="flex" alignItems="center" gap={1}>
-          <Typography
-            variant="body2"
-            sx={{
-              textDecoration: "line-through",
-              color: "gray",
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-            }}
-          >
-            ${parseFloat(basePrice).toFixed(2)}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              fontStyle: "italic",
-              color: "green",
-              fontSize: { xs: "0.75rem", sm: "0.9rem" },
-            }}
-          >
-            {discountLabel}
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              color: "green",
-              fontWeight: "bold",
-              fontSize: { xs: "1rem", sm: "1.2rem", md: "1.3rem" },
-            }}
-          >
-            ${parseFloat(discounted).toFixed(2)}
-          </Typography>
-        </Box>
-      );
-    } else {
-      return (
-        <Typography
-          variant="h6"
-          sx={{
-            mt: 1,
-            fontWeight: "bold",
-            fontSize: { xs: "1rem", sm: "1.2rem", md: "1.4rem" },
-          }}
-        >
-          ${parseFloat(basePrice).toFixed(2)}
-        </Typography>
-      );
-    }
-  };
-
   const handleDeleteFlavor = (idx) => {
     const newFlavors = [...editFlavors];
     newFlavors.splice(idx, 1);
@@ -225,9 +147,16 @@ const ProductCard = ({
   };
 
   const handleFlavorChange = (index, field, value) => {
-    const newFlavors = [...editFlavors];
-    newFlavors[index][field] = value;
-    setEditFlavors(newFlavors);
+    setEditFlavors((prev) =>
+      prev.map((flavor, idx) =>
+        idx === index
+          ? { 
+              ...flavor,
+              [field]: value 
+            }
+          : flavor
+      )
+    );
   };
 
   const handleAddFlavor = () => {
@@ -352,9 +281,6 @@ const ProductCard = ({
       qty: Number(qty),
       price: parseFloat(price)
     }))
-      .unwrap()
-      .then(() => alertSnackbar("Product added to cart."))
-      .catch(() => alertSnackbar("Failed to add product to cart.", "error"));
   };    
 
   const handleClick = () => {
@@ -389,6 +315,74 @@ const ProductCard = ({
       flavor: cartItem?.flavor
     }));  
   }
+
+  const renderPrice = () => {
+    const discounted = getDiscountedPrice();
+    const flavorName = isAdmin ? selectedFlavorForStock : selectedFlavorForCart;
+    const flavorPrice =
+      hasFlavors && isIndividualPricing
+        ? product.flavors.find((f) => f.name === flavorName)?.price
+        : null;
+    const basePrice =
+      flavorPrice !== null && flavorPrice !== undefined
+        ? parseFloat(flavorPrice)
+        : parseFloat(editPrice);
+
+    if (discounted !== null && discounted < basePrice) {
+      const discountLabel =
+        product.discountType === "percent"
+          ? `(-${product.discountValue}%)`
+          : `(-$${parseFloat(product.discountValue).toFixed(2)})`;
+
+      return (
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography
+            variant="body2"
+            sx={{
+              textDecoration: "line-through",
+              color: "gray",
+              fontSize: { xs: "0.9rem", sm: "1rem" },
+            }}
+          >
+            ${parseFloat(basePrice).toFixed(2)}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              fontStyle: "italic",
+              color: "green",
+              fontSize: { xs: "0.75rem", sm: "0.9rem" },
+            }}
+          >
+            {discountLabel}
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{
+              color: "green",
+              fontWeight: "bold",
+              fontSize: { xs: "1rem", sm: "1.2rem", md: "1.3rem" },
+            }}
+          >
+            ${parseFloat(discounted).toFixed(2)}
+          </Typography>
+        </Box>
+      );
+    } else {
+      return (
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 1,
+            fontWeight: "bold",
+            fontSize: { xs: "1rem", sm: "1.2rem", md: "1.4rem" },
+          }}
+        >
+          ${parseFloat(basePrice).toFixed(2)}
+        </Typography>
+      );
+    }
+  };
 
   return (
     <Card
@@ -677,13 +671,6 @@ const ProductCard = ({
         handleClose={() => setDeleteOpen(false)}
         product={product}
         handleConfirmDelete={handleConfirmDelete}
-      />
-
-      <SnackbarAlert
-        message={snackbarMsg}
-        severity={snackbarSeverity}
-        open={snackbarOpen}
-        setOpen={setSnackbarOpen}
       />
     </Card>
   );

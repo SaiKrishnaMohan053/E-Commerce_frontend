@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, forgotPassword, clearMessage, clearError } from "../store/slices/authSlice.js";
 import {
   TextField,
   Button,
@@ -20,31 +19,26 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import SnackbarAlert from "../components/snackbarAlert";
+
+import { loginUser, forgotPassword, clearMessage, clearError } from "../../store/slices/authSlice.js";
+import { showAlert } from "../../store/slices/alertSlice.js";
 
 const Login = () => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading, user, error, message } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotDialogOpen, setForgotDialogOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const { loading, user, error, message } = useSelector((state) => state.auth);
-
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("success");
-
   useEffect(() => {
     if (user) {
       if (!user.isApproved) {
-        setAlertMessage("Your account is pending approval. You cannot make purchases yet.");
-        setAlertSeverity("warning");
-        setAlertOpen(true);
+        dispatch(showAlert({ message: "Login successful!", severity: "success" }));
       } else {
         navigate("/");
       }
@@ -53,16 +47,12 @@ const Login = () => {
 
   useEffect(() => {
     if (error) {
-      setAlertMessage(error);
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: error, severity: "error" }));
       dispatch(clearError());
     }
 
     if (message) {
-      setAlertMessage(message);
-      setAlertSeverity("success");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: message, severity: "success" }));
       dispatch(clearMessage());
     }
   }, [error, message, dispatch]);
@@ -76,24 +66,22 @@ const Login = () => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setAlertMessage("Please enter a valid email address.");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Please enter a valid email address.", severity: "error" }));
       return;
     }
 
     dispatch(loginUser(formData));
+    dispatch(showAlert({ message: "Login successful!", severity: "success" }));
   };
 
   const handleForgotSubmit = () => {
     if (!forgotEmail) {
-      setAlertMessage("Please enter your email.");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Please enter your email.", severity: "error" }));
       return;
     }
 
     dispatch(forgotPassword(forgotEmail));
+    dispatch(showAlert({ message: "Password reset link sent to your email.", severity: "success" }));
     setForgotDialogOpen(false);
   };
 
@@ -123,13 +111,6 @@ const Login = () => {
             <Typography variant="h4" textAlign="center" fontWeight="bold" gutterBottom>
               Login
             </Typography>
-
-            <SnackbarAlert
-              open={alertOpen}
-              setOpen={setAlertOpen}
-              severity={alertSeverity}
-              message={alertMessage}
-            />
 
             <form onSubmit={handleSubmit}>
               <TextField

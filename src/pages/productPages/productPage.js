@@ -2,25 +2,25 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
-  CircularProgress,
   TextField,
   MenuItem,
   Button,
   IconButton,
   useMediaQuery,
+  Skeleton,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart } from "../store/slices/cartSlice";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { updateCartItem, removeCartItem } from "../store/slices/cartSlice";
-import { fetchSingleProduct, fetchProductsByCategory } from "../store/slices/productSlice";
+
+import { addToCart, updateCartItem, removeCartItem } from "../../store/slices/cartSlice";
+import { fetchSingleProduct, fetchProductsByCategory } from "../../store/slices/productSlice";
 import MiniProductCard from "./miniProductPage";
-import ProductImages from "../components/productImg";
-import SnackbarAlert from "../components/snackbarAlert";
+import ProductImages from "../../components/productImg";
+import { showAlert } from "../../store/slices/alertSlice";
 
 const ProductPage = () => {
   const { id } = useParams();
@@ -30,18 +30,10 @@ const ProductPage = () => {
   const { selectedProduct, loading } = useSelector((state) => state.product);
   const { user } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
+
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedFlavor, setSelectedFlavor] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
-  const alertSnackbar = (msg, sev = "success") => {
-    setSnackbarMsg(msg);
-    setSnackbarSeverity(sev);
-    setSnackbarOpen(true);
-  };
 
   useEffect(() => {
     if (id && id !== selectedProduct?._id) {
@@ -59,7 +51,7 @@ const ProductPage = () => {
           setRelatedProducts(res.products || res);
         })
         .catch((err) => {
-          console.error("Error fetching related products:", err);
+          dispatch(showAlert({ message: "Error fetching related products", severity: "error" }));
         });
     }
   }, [dispatch, selectedProduct]);  
@@ -69,8 +61,6 @@ const ProductPage = () => {
       setSelectedFlavor(selectedProduct.flavors[0]?.name || "");
     }
   }, [selectedProduct]);
-
-  if (loading || !selectedProduct) return <CircularProgress />;
 
   const flavorInfo = selectedProduct.flavors?.find(
     (flavor) => flavor.name === selectedFlavor
@@ -111,8 +101,8 @@ const ProductPage = () => {
       price: parseFloat(price)
     }))
       .unwrap()
-      .then(() => alertSnackbar("Product added to cart."))
-      .catch(() => alertSnackbar("Failed to add product to cart.", "error"));
+      .then(() => dispatch(showAlert({ message: "Product added to cart", severity: "success" })))
+      .catch(() => dispatch(showAlert({ message: "Failed to add product to cart", severity: "error" })));
   }; 
   
   const handleInc = () =>
@@ -143,6 +133,27 @@ const ProductPage = () => {
       flavor: selectedFlavor || null
     }));  
   }
+
+  if (loading || !selectedProduct) {
+    return (
+      <Box p={isMobile ? 2 : 4}>
+        <Box display="flex" flexDirection={isMobile ? "column" : "row"} gap={4}>
+          <Box width={isMobile ? "100%" : "50%"}>
+            <Skeleton variant="rectangular" width="100%" height={isMobile ? 200 : 300} />
+          </Box>
+          <Box width={isMobile ? "100%" : "40%"}>
+            <Skeleton variant="text" width="60%" height={40} />
+            <Skeleton variant="text" width="80%" />
+            <Box display="flex" gap={2} mt={2}>
+              <Skeleton variant="rectangular" width={120} height={40} />
+              <Skeleton variant="rectangular" width={120} height={40} />
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    );
+  }
+  
   return (
     <Box p={isMobile ? 2 : 4}>
       <Box
@@ -368,12 +379,6 @@ const ProductPage = () => {
             </Box>
           )}
         </Box>
-        <SnackbarAlert
-          message={snackbarMsg}
-          severity={snackbarSeverity}
-          open={snackbarOpen}
-          setOpen={setSnackbarOpen}
-        />
     </Box>
   );
 };

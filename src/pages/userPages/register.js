@@ -1,47 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser, clearMessage, clearError } from "../store/slices/authSlice.js";
 import {
   TextField,
   Button,
   CircularProgress,
   Container,
   Typography,
-  Snackbar,
-  Alert,
   Paper,
   Box,
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate, Link } from "react-router-dom";
+import { registerUser, clearMessage, clearError } from "../../store/slices/authSlice.js";
+import { showAlert } from "../../store/slices/alertSlice.js";
 
 const Register = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, message, error } = useSelector((state) => state.auth);
-
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("info");
-
-  useEffect(() => {
-    if (message) {
-      setAlertMessage(message);
-      setAlertSeverity("success");
-      setAlertOpen(true);
-      dispatch(clearMessage());
-    }
-    if (error) {
-      setAlertMessage(error);
-      setAlertSeverity("error");
-      setAlertOpen(true);
-      dispatch(clearError());
-    }
-  }, [message, error, dispatch]);
 
   const [formData, setFormData] = useState({
     ownerName: "",
@@ -53,6 +32,17 @@ const Register = () => {
     abcLicense: null,
     salesTaxLicense: null,
   });
+
+  useEffect(() => {
+    if (message) {
+      dispatch(showAlert({ message: message, severity: "success" }));
+      dispatch(clearMessage());
+    }
+    if (error) {
+      dispatch(showAlert({ message: error, severity: "error" }));
+      dispatch(clearError());
+    }
+  }, [message, error, dispatch]);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^[0-9]{10}$/;
@@ -78,25 +68,19 @@ const Register = () => {
     e.preventDefault();
 
     if (!emailRegex.test(formData.email)) {
-      setAlertMessage("Please enter a valid email address.");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Please enter a valid email address.", severity: "error" }));
       return;
     }
 
     if (!phoneRegex.test(formData.phoneNumber)) {
-      setAlertMessage("Please enter a valid 10-digit phone number.");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Please enter a valid 10-digit phone number.", severity: "error" }));
       return;
     }
 
     const resultAction = await dispatch(registerUser(formData));
 
     if (registerUser.fulfilled.match(resultAction)) {
-      setAlertMessage("User registered successfully! Awaiting admin approval.");
-      setAlertSeverity("success");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Registration successful! Awaiting admin approval.", severity: "success" }));
       navigate("/login");
     }
   };
@@ -165,12 +149,6 @@ const Register = () => {
           </Link>
         </Typography>
       </Paper>
-
-      <Snackbar open={alertOpen} autoHideDuration={5000} onClose={() => setAlertOpen(false)}>
-        <Alert severity={alertSeverity} variant="filled">
-          {alertMessage}
-        </Alert>
-      </Snackbar>
     </Container>
   );
 };

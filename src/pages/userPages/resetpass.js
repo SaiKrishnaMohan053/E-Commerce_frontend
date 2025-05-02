@@ -3,8 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   TextField,
   Button,
-  Snackbar,
-  Alert,
   Container,
   Typography,
   InputAdornment,
@@ -16,20 +14,19 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { useTheme } from "@mui/material/styles";
-import { resetPassword } from "../store/slices/authSlice.js";
+import { resetPassword } from "../../store/slices/authSlice.js";
+import { showAlert } from "../../store/slices/alertSlice.js";
 
 const ResetPassword = () => {
   const { token } = useParams();
-  const [newPassword, setNewPassword] = useState("");
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertSeverity, setAlertSeverity] = useState("info");
-  const [showPassword, setShowPassword] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const getPasswordStrength = (password) => {
     if (password.length < 6) return "Weak";
@@ -54,9 +51,7 @@ const ResetPassword = () => {
     e.preventDefault();
 
     if (newPassword.length < 6) {
-      setAlertMessage("Password must be at least 6 characters long.");
-      setAlertSeverity("error");
-      setAlertOpen(true);
+      dispatch(showAlert({ message: "Password must be at least 6 characters long.", severity: "error" }));
       return;
     }
 
@@ -65,15 +60,11 @@ const ResetPassword = () => {
     setSubmitting(false);
 
     if (resetPassword.fulfilled.match(result)) {
-      setAlertMessage("Password successfully reset! Redirecting...");
-      setAlertSeverity("success");
+      dispatch(showAlert({ message: "Password reset successfully!", severity: "success" }));
       setTimeout(() => navigate("/login"), 3000);
     } else {
-      setAlertMessage("Invalid or expired token. Try again.");
-      setAlertSeverity("error");
+      dispatch(showAlert({ message: "Failed to reset password. Please try again.", severity: "error" }));
     }
-
-    setAlertOpen(true);
   };
 
   return (
@@ -142,12 +133,6 @@ const ResetPassword = () => {
             {submitting ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Submit"}
           </Button>
         </form>
-
-        <Snackbar open={alertOpen} autoHideDuration={5000} onClose={() => setAlertOpen(false)}>
-          <Alert severity={alertSeverity} variant="filled">
-            {alertMessage}
-          </Alert>
-        </Snackbar>
       </Paper>
     </Container>
   );

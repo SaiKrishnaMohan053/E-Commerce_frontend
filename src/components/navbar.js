@@ -13,7 +13,7 @@ import {
   Badge,
   Drawer,
   List,
-  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Divider,
@@ -26,14 +26,16 @@ import SearchIcon from "@mui/icons-material/Search";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MenuIcon from "@mui/icons-material/Menu";
 import AddIcon from "@mui/icons-material/Add";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser } from "../store/slices/authSlice.js";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+
+import { logoutUser } from "../store/slices/authSlice.js";
 import { fetchCart } from "../store/slices/cartSlice.js";
 
 const Navbar = () => {
@@ -42,11 +44,15 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
+
   const { user } = useSelector((state) => state.auth);
   const cartItemCount = useSelector((state) => state.cart?.items.length || 0);
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [adminMenuAnchor, setAdminMenuAnchor] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -73,9 +79,6 @@ const Navbar = () => {
   
     return () => clearTimeout(delaySearch);
   }, [searchTerm, API_BASE_URL]);       
-
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [adminMenuAnchor, setAdminMenuAnchor] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -125,51 +128,55 @@ const Navbar = () => {
         {isAdmin ? (
           <>
             <Typography variant="h6" sx={{ px: 2, py: 1, color: "#1976d2" }}>Admin</Typography>
-            <ListItem button onClick={() => navigate("/admin")} sx={{ py: 1.5 }}>
+            <ListItemButton onClick={() => navigate("/admin")} sx={{ py: 1.5 }}>
               <ListItemIcon><AccountCircleIcon color="primary" /></ListItemIcon>
               <ListItemText primary="Users" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItem>
-            <ListItem button onClick={() => navigate("/admin/add-product")} sx={{ py: 1.5 }}>
+            </ListItemButton>
+            <ListItemButton onClick={() => navigate("/admin/add-product")} sx={{ py: 1.5 }}>
               <ListItemIcon><AddIcon color="primary" /></ListItemIcon>
               <ListItemText primary="Add a Product" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItem>
+            </ListItemButton>
+            <ListItemButton onClick={() => navigate("/admin/orders")} sx={{ py: 1.5 }}>
+              <ListItemIcon><ListAltIcon color="primary" /></ListItemIcon>
+              <ListItemText primary="orders" primaryTypographyProps={{ fontSize: 16 }} />
+            </ListItemButton>
           </>
         ) : (
           <>
-            <ListItem button onClick={() => navigate("/orders")} sx={{ py: 1.5 }}>
+            <ListItemButton onClick={() => navigate("/orders")} sx={{ py: 1.5 }}>
               <ListItemIcon><ShoppingCartIcon /></ListItemIcon>
               <ListItemText primary="My Orders" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItem>
-            <ListItem button onClick={() => navigate("/wishlist")} sx={{ py: 1.5 }}>
+            </ListItemButton>
+            <ListItemButton onClick={() => navigate("/wishlist")} sx={{ py: 1.5 }}>
               <ListItemIcon><FavoriteBorderIcon /></ListItemIcon>
               <ListItemText primary="Wishlist" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItem>
+            </ListItemButton>
           </>
         )}
   
         <Divider sx={{ my: 1 }} />
   
-        <ListItem button onClick={() => navigate("/cart")} sx={{ py: 1.5 }}>
+        <ListItemButton onClick={() => navigate("/cart")} sx={{ py: 1.5 }}>
           <ListItemIcon><ShoppingCartIcon color="error" /></ListItemIcon>
           <ListItemText primary={`Cart (${cartItemCount})`} primaryTypographyProps={{ fontSize: 16 }} />
-        </ListItem>
+        </ListItemButton>
   
         {user ? (
           <>
-            <ListItem button onClick={() => navigate("/profile")} sx={{ py: 1.5 }}>
+            <ListItemButton onClick={() => navigate("/profile")} sx={{ py: 1.5 }}>
               <ListItemIcon><AccountCircleIcon /></ListItemIcon>
               <ListItemText primary="Profile" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItem>
-            <ListItem button onClick={handleLogout} sx={{ py: 1.5 }}>
+            </ListItemButton>
+            <ListItemButton onClick={handleLogout} sx={{ py: 1.5 }}>
               <ListItemIcon><LogoutIcon color="error" /></ListItemIcon>
               <ListItemText primary="Logout" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItem>
+            </ListItemButton>
           </>
         ) : (
-          <ListItem button onClick={() => navigate("/login")} sx={{ py: 1.5 }}>
+          <ListItemButton onClick={() => navigate("/login")} sx={{ py: 1.5 }}>
             <ListItemIcon><LoginIcon /></ListItemIcon>
             <ListItemText primary="Login" primaryTypographyProps={{ fontSize: 16 }} />
-          </ListItem>
+          </ListItemButton>
         )}
       </List>
     </Box>
@@ -295,6 +302,7 @@ const Navbar = () => {
                 >
                   <MenuItem onClick={() => { navigate("/admin"); handleAdminMenuClose(); }}>Users</MenuItem>
                   <MenuItem onClick={() => { navigate("/admin/add-product"); handleAdminMenuClose(); }}>Add a Product</MenuItem>
+                  <MenuItem onClick={() => { navigate("/admin/orders"); handleAdminMenuClose(); }}>Orders</MenuItem>
                 </Menu>
               </>
             ) : (

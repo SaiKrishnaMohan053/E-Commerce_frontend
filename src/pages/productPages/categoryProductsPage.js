@@ -6,31 +6,33 @@ import {
   Grid,
   Container,
   Typography,
-  CircularProgress,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
   Pagination,
+  Card,
+  CardContent,
+  Skeleton,
 } from "@mui/material";
-import ProductCard from "../components/productCard/productCard.js";
+import { jwtDecode } from "jwt-decode";
+
+import ProductCard from "../../components/productCard/productCard.js";
 import {
   fetchProductsByCategory,
   deleteProductById,
   updateProductStock,
   editProductDetails,
-} from "../store/slices/productSlice";
-import { jwtDecode } from "jwt-decode";
-import SnackbarAlert from "../components/snackbarAlert";
+} from "../../store/slices/productSlice";
+import { showAlert } from "../../store/slices/alertSlice";
 
 const CategoryProducts = () => {
   const dispatch = useDispatch();
+  const { products, loading, error, totalPages } = useSelector((state) => state.product);
   const { category, subCategory } = useParams();
   const subCategories = subCategory;
+
   const [sortOption, setSortOption] = useState("");
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const [searchParams, setSearchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight") || null;
@@ -78,31 +80,25 @@ const CategoryProducts = () => {
       const decoded = jwtDecode(storedUser.token);
       isAdmin = decoded?.isAdmin;
     } catch (err) {
-      console.error("Invalid token", err);
+      dispatch(showAlert({ message: "Invalid token", severity: "error" }));
     }
   }
 
   const handleDelete = (product) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       dispatch(deleteProductById(product._id));
-      setSnackbarMessage("Product deleted successfully");
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
+      dispatch(showAlert({ message: "Product deleted successfully", severity: "success" }));
     }
   };
 
   const handleUpdateStock = ({ id, stock, name }) => {
     dispatch(updateProductStock({ id, stock, name }));
-    setSnackbarMessage("Stock updated successfully");
-    setSnackbarSeverity("success");
-    setSnackbarOpen(true);
+    dispatch(showAlert({ message: "Stock updated successfully", severity: "success" }));
   };
 
   const handleEdit = (updatedProduct) => {
     dispatch(editProductDetails(updatedProduct));
-    setSnackbarMessage("Product updated successfully");
-    setSnackbarSeverity("success");
-    setSnackbarOpen(true);
+    dispatch(showAlert({ message: "Product updated successfully", severity: "success" }));
   };
 
   const handleAddToCart = (product) => {
@@ -116,9 +112,6 @@ const CategoryProducts = () => {
   const handleDecrement = (product) => {
     alert(`Decrement quantity for: ${product.name}`);
   };
-
-  const { products, loading, error, totalPages } = useSelector((state) => state.product);
-  console.log("Products:", products);
 
   const displayedProducts = React.useMemo(() => {
     if (!highlightId || products.length === 0) return products;
@@ -144,8 +137,23 @@ const CategoryProducts = () => {
       </Typography>
 
       {loading ? (
-        <Box display="flex" justifyContent="center" mt={5}>
-          <CircularProgress />
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            gap: 3,
+            p: 2,
+          }}
+        >
+          {Array.from({ length: productsPerPage }).map((_, idx) => (
+            <Card key={idx} sx={{ p: 1 }}>
+              <Skeleton variant="rectangular" height={140} />
+              <CardContent>
+                <Skeleton variant="text" width="60%" />
+                <Skeleton variant="text" width="40%" />
+              </CardContent>
+            </Card>
+          ))}
         </Box>
       ) : error ? (
         <Typography color="error" textAlign="center">
@@ -209,18 +217,12 @@ const CategoryProducts = () => {
                 onChange={handlePageChange}
                 color="primary"
                 siblingCount={1}
-                boundaryCount={1}
+                boundaryCount={2}
               />
             </Box>
           )}
         </>
       )}
-      <SnackbarAlert
-        message={snackbarMessage}
-        severity={snackbarSeverity}
-        open={snackbarOpen}
-        setOpen={setSnackbarOpen}
-      />
     </Container>
   );
 };

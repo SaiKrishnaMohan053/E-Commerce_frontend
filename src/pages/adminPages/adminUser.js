@@ -8,17 +8,17 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchUsers, approveUser, rejectUser,
-  deleteUser, editUser
-} from "../store/slices/authSlice.js";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import SnackbarAlert from "../components/snackbarAlert.js";
 import { useTheme } from "@mui/material/styles";
+
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import {
+  fetchUsers, approveUser, rejectUser,
+  deleteUser, editUser
+} from "../../store/slices/authSlice.js";
 
 const cellStyle = {
   fontSize: { xs: "12px", sm: "13px" },

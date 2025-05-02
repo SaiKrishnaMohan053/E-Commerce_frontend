@@ -19,7 +19,7 @@ const ProductImages = ({ images = [], altText = "Product Image" }) => {
           borderRadius: 1,
           backgroundColor: "#fff",
         }}
-        image={hasImages ? images[selectedIndex].url : fallbackImage}
+        image={hasImages ? images[selectedIndex].url : (fallbackImage || null)}
         alt={altText || "Product Image"}
       />
       {hasImages && (
