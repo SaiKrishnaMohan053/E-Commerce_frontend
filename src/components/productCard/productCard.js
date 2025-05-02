@@ -266,6 +266,10 @@ const ProductCard = ({
   };
 
   const handleAddToCart = () => {
+    if(!isLoggedIn){
+      navigate("/login");
+    }
+    
     const qty = 1;
     const flavor = hasFlavors ? selectedFlavorForCart : null;
     const rawPrice = getDiscountedPrice() ??

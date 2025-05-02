@@ -118,7 +118,10 @@ const ProductPage = () => {
   : selectedProduct.stock === 0;
 
   const handleAddToCart = () => {
-    const price = selectedProduct.isDeal
+    if (!user) {
+      navigate("/login");
+    } else {
+      const price = selectedProduct.isDeal
       ? parseFloat(finalPrice)
       : parseFloat(basePrice);
   
@@ -131,6 +134,7 @@ const ProductPage = () => {
       .unwrap()
       .then(() => dispatch(showAlert({ message: "Product added to cart", severity: "success" })))
       .catch(() => dispatch(showAlert({ message: "Failed to add product to cart", severity: "error" })));
+    }
   }; 
   
   const handleInc = () =>

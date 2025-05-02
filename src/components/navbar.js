@@ -96,6 +96,22 @@ const Navbar = () => {
     isAdmin = decodedToken?.isAdmin || false;
   }
 
+  const goToOrders = () => {
+    if(!user) {
+      navigate("/login");
+    } else {
+      navigate("/orders");
+    }
+  }
+
+  const goToCart = () => {
+    if(!user) {
+      navigate("/login");
+    } else {
+      navigate("/cart");
+    }
+  }
+
   const handleLogout = () => {
     dispatch(logoutUser());
     navigate("/login");
@@ -143,7 +159,7 @@ const Navbar = () => {
           </>
         ) : (
           <>
-            <ListItemButton onClick={() => navigate("/orders")} sx={{ py: 1.5 }}>
+            <ListItemButton onClick={goToOrders} sx={{ py: 1.5 }}>
               <ListItemIcon><ShoppingCartIcon /></ListItemIcon>
               <ListItemText primary="My Orders" primaryTypographyProps={{ fontSize: 16 }} />
             </ListItemButton>
@@ -156,10 +172,12 @@ const Navbar = () => {
   
         <Divider sx={{ my: 1 }} />
   
-        <ListItemButton onClick={() => navigate("/cart")} sx={{ py: 1.5 }}>
-          <ListItemIcon><ShoppingCartIcon color="error" /></ListItemIcon>
-          <ListItemText primary={`Cart (${cartItemCount})`} primaryTypographyProps={{ fontSize: 16 }} />
-        </ListItemButton>
+        {!isAdmin && (
+          <ListItemButton onClick={goToCart} sx={{ py: 1.5 }}>
+            <ListItemIcon><ShoppingCartIcon color="error" /></ListItemIcon>
+            <ListItemText primary={`Cart (${cartItemCount})`} primaryTypographyProps={{ fontSize: 16 }} />
+          </ListItemButton>
+        )}
   
         {user ? (
           <>
@@ -307,16 +325,18 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={() => navigate("/orders")}>My Orders</Button>
+                <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={goToOrders}>My Orders</Button>
                 <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={() => navigate("/wishlist")}>Wishlist</Button>
               </>
             )}
 
-            <IconButton color="inherit" sx={{ mr: 2 }} onClick={() => navigate("/cart") }>
-              <Badge badgeContent={cartItemCount} color="error">
-                <ShoppingCartIcon fontSize="large" />
-              </Badge>
-            </IconButton>
+            {!isAdmin && (
+              <IconButton color="inherit" sx={{ mr: 2 }} onClick={goToCart}>
+                <Badge badgeContent={cartItemCount} color="error">
+                  <ShoppingCartIcon fontSize="large" />
+                </Badge>
+              </IconButton>
+            )}
 
             {user ? (
               <>
