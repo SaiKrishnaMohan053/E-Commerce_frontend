@@ -170,7 +170,7 @@ const OrderDetailPage = () => {
             <Box display="flex" alignItems="center" width="100%">
               <Box
                 component="img"
-                src={item.product?.images[0]?.url || "/placeholder.png"}
+                src={item.product?.images[0]?.url || "/no-image.png"}
                 alt={item.name}
                 sx={{ width: 60, height: 60, objectFit: "cover", mr: 2, borderRadius: 1 }}
               />
