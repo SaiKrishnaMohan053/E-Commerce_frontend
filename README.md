@@ -1,91 +1,123 @@
-# E‑Commerce - Frontend
+# E-Commerce Frontend
 
-This is the frontend e‑commerce web application. It is built using React.js and supports both regular users and administrators with features such as user registration, login, profile, admin panel, user management, and product management.
+This is the frontend e-commerce web application. It is built using React.js and supports both regular users and administrators with features such as user registration, login, profile, admin panel, user management, product management—and now wishlist/favorites!
 
 ---
 
 ## Features
 
 ### User
-- Register & login with JWT‑based authentication
-- Profile view and update
-- View product details (flavored & non‑flavored) with **alphabetically sorted** flavor selectors
-- View related products on product detail page
-- Deal badge with price strike‑through and discount info
-- Product pagination, search, and category filtering
-- **Add to Cart** functionality
-  - Support for flavored and non‑flavored products
-  - Quantity selector with purchase‑limit validation
-  - Quantity updates synchronized with Redux
-- **Checkout Page**
-  - Place orders with automatic **quantity clamping** to available stock
-  - Displays warnings if any quantities were adjusted
-  - Responsive layout with pick‑up or delivery options
-- **Cart Page**
-  - View items with price & quantity breakdown
-  - Inline quantity editing and remove buttons
-  - Clear entire cart option
-- **My Orders** page
-  - Fetches orders with **paginated** API calls
-  - Latest orders first, oldest last
-  - **MUI Pagination** with ellipsis for large page counts
-  - **Skeleton loading** and **error** states for robust UX
-- **Order Details** page
-  - View line items, totals, and shipping info
-  - **Admin Actions**: update status, upload invoice, cancel order
-  - Cancel restores stock and sold counts server‑side
-  - Cancellation shows global warning alert
+
+* **Authentication & Profile**
+
+  * Register & login with JWT-based authentication
+  * Profile view & update
+* **Product Browsing**
+
+  * View product details (flavored & non-flavored) with **alphabetically sorted** flavor selectors
+  * View related products on product detail page (horizontal scroll)
+  * Deal badge with price strike-through & discount info
+  * Product pagination, search, and category filtering
+* **Cart & Checkout**
+
+  * **Add to Cart** (flavor-aware, purchase-limit enforced)
+  * Quantity selector in-line or by typing
+  * **Global Snackbar Alerts** via Redux—survive route changes
+  * **Cart Page**
+
+    * View items with price & quantity breakdown
+    * Inline quantity editing & remove buttons
+    * Clear entire cart option
+  * **Checkout Page**
+
+    * Place orders with **quantity clamping** to available stock
+    * Displays warnings if any quantities were adjusted
+    * Responsive layout with pick-up or delivery options
+* **Orders**
+
+  * **My Orders** page
+
+    * Fetches orders with paginated API calls
+    * Latest first, oldest last
+    * **MUI Pagination** with `siblingCount` & `boundaryCount` (ellipsis)
+    * **Skeleton** loading & **Alert** error states
+  * **Order Details** page
+
+    * View line items, totals, shipping info
+    * **Admin Actions**: update status, upload invoice, cancel order
+    * Cancel restores stock & sold counts server-side
+
+### Wishlist / Favorites
+
+* **Wishlist Page**
+
+  * Add/remove favorites from product cards or cart
+  * List layout matching cart style, responsive for mobile/tablet/desktop
+  * Move items between wishlist & cart with a single click
 
 ### Admin
-- Login as admin
-- View, edit, delete, and update stock of products
-- Add new products (with image upload to AWS S3)
-- Add flavored & non‑flavored products with individual price/stock
-- Deal & discount management
-- User management dashboard
-  - Approve, reject, edit, and delete users
-  - Email notifications on rejection
-- **Order workflows**
-  - Approve or reject order cancellations
-  - Track order status through Processing, Ready, Delivered, etc.
-  - Upload invoices and download links
+
+* Login as admin
+* **Product Management**
+
+  * Create / Read / Update / Delete products (with image upload to AWS S3)
+  * Flavored & non-flavored products with individual price/stock
+  * Deal & discount management
+* **User Management**
+
+  * Approve/reject users, view/edit/delete users
+  * Email notifications on rejection
+* **Order Workflows**
+
+  * View all orders with pagination
+  * Approve or reject order cancellations
+  * Track status: Processing → Ready → Delivered → Picked Up → Cancelled
+  * Upload invoices & download links
 
 ### UI/UX
-- Fully responsive layout (mobile/tablet/desktop)
-- Mobile drawer navigation
-- **Material UI (MUI)** design system
-- **Global Snackbar Alerts** via Redux
-  - Centralized in the `Layout` component
-  - Survives route changes for consistent feedback
-- **Skeleton** placeholders for loading states
-- **Alert** components for error messages
-- **MUI Pagination** with `siblingCount` & `boundaryCount` for ellipsis control
-- Smooth image display with multiple views
-- Horizontal scrollable related product section
+
+* Fully responsive layout (mobile/tablet/desktop)
+* Mobile drawer navigation
+* **Material UI (MUI)** design system
+* **Global Snackbar Alerts** via Redux in a centralized `Layout`
+* **Skeleton** placeholders for loading states
+* **Alert** components for errors
+* Smooth image display with zoom & multiple views
+* Horizontal scrollable related products
 
 ---
 
 ## Tech Stack
 
-- **React.js** – Component‑based frontend framework
-- **Redux Toolkit** – Centralized state management
-- **React Router** – Client‑side routing
-- **Material UI (MUI)** – Modern UI component library
-- **Axios** – API communication
-- **jwt‑decode** – Decode JWT for role‑based access
-- **AWS S3** – File storage for product images
-- **Vercel** – Frontend hosting
+* **React.js** – Component-based frontend
+* **Redux Toolkit** – Centralized state management
+* **React Router** – Client-side routing
+* **Material UI (MUI)** – UI component library
+* **Axios** – API communication
+* **jwt-decode** – Decode JWT for role-based UI
+* **AWS S3** – File storage for product images
+* **Vercel** – Frontend hosting
 
 ---
 
-## Upcoming Features
+## Environment Variables
 
-- Wishlist
-- Admin and User dashboard analytics
+Define in a `.env` at project root:
+
+```env
+REACT_APP_API_BASE_URL=https://your-backend.example.com
+```
 
 ---
 
-## 👨‍💻 Maintained By
+## Deployment
 
-**Sai Krishna Mohan Kolla**  
+* Hosted on **Vercel**
+* Auto-deploy from `main` branch on Git push
+
+---
+
+## Maintained By
+
+**Sai Krishna Mohan Kolla**
 Full Stack Developer – MERN | AWS | CI/CD

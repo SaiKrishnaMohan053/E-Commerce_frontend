@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -15,7 +15,10 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
+import { fetchWishlist, addWishlistItem, removeWishlistItem } from "../../store/slices/wishlistSlice";
 import { addToCart, updateCartItem, removeCartItem } from "../../store/slices/cartSlice";
 import { fetchSingleProduct, fetchProductsByCategory } from "../../store/slices/productSlice";
 import MiniProductCard from "./miniProductPage";
@@ -30,6 +33,7 @@ const ProductPage = () => {
   const { selectedProduct, loading } = useSelector((state) => state.product);
   const { user } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.items);
+  const { items: wishlistItem } = useSelector((state) => state.wishlist);
 
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedFlavor, setSelectedFlavor] = useState("");
@@ -55,6 +59,15 @@ const ProductPage = () => {
         });
     }
   }, [dispatch, selectedProduct]);  
+
+  useEffect(() => {
+    dispatch(fetchWishlist())
+  },[dispatch])
+
+  const inWishlist = useMemo(
+    () => wishlistItem.some(p => p._id === selectedProduct?._id),
+    [wishlistItem, selectedProduct?._id]
+  );
 
   const sortedFlavors = React.useMemo(() => {
     return Array.isArray(selectedProduct?.flavors)
@@ -180,9 +193,36 @@ const ProductPage = () => {
         </Box>
 
         <Box width={isMobile ? "100%" : "40%"}>
-          <Typography variant="h4" fontWeight="bold" gutterBottom>
-            {selectedProduct.name}
-          </Typography>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            mb={2}
+          >
+            <Typography variant="h4" fontWeight="bold">
+              {selectedProduct.name}
+            </Typography>
+
+            <IconButton
+              onClick={() => {
+                if (!user) {
+                  return navigate("/login");
+                }
+                // toggle
+                dispatch(
+                  inWishlist
+                    ? removeWishlistItem(selectedProduct._id)
+                    : addWishlistItem(selectedProduct._id)
+                );
+              }}
+              aria-label={inWishlist ? "Remove from favorites" : "Add to favorites"}
+            >
+              {inWishlist
+                ? <FavoriteIcon color="error" />
+                : <FavoriteBorderIcon />}
+            </IconButton>
+          </Box>
+
           <Typography variant="body1" color="text.secondary" mb={2}>
             {selectedProduct.description}
           </Typography>

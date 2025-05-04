@@ -19,8 +19,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
 import { addToCart,updateCartItem, removeCartItem } from "../../store/slices/cartSlice";
+import { addWishlistItem, removeWishlistItem } from "../../store/slices/wishlistSlice";
 import ProductImages from "../productImg";
 import EditModal from "./editModal";
 import StockUpdateModal from "./stockUpdateModal";
@@ -37,6 +40,7 @@ const ProductCard = ({
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => Boolean(state.auth.user));
   const cartItems = useSelector((state) => state.cart.items);
+  const inWishlist = useSelector((state) => state.wishlist.items.some(item => item._id === product._id));
 
   const sortFlavorsAZ = (flavors = []) =>
     [...flavors].sort((a, b) =>
@@ -391,6 +395,7 @@ const ProductCard = ({
   return (
     <Card
       sx={{
+        position: "relative",
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -401,6 +406,26 @@ const ProductCard = ({
         minHeight: { xs: "auto", sm: 380, md: 420 },
       }}
     >
+      <IconButton
+        onClick={() =>
+          inWishlist
+            ? dispatch(removeWishlistItem(product._id))
+            : dispatch(addWishlistItem(product._id))
+        }
+        sx={{
+          position: 'absolute',
+          top: 12,
+          right: 20,
+          zIndex: 1,
+        }}
+        aria-label={inWishlist ? "Remove from favorites" : "Add to favorites"}
+      >
+        {inWishlist ? (
+          <FavoriteIcon color="error" />
+        ) : (
+          <FavoriteBorderIcon />
+        )}
+      </IconButton>
       <CardContent
         sx={{
           flexGrow: 1,

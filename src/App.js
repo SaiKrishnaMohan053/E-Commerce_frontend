@@ -14,6 +14,7 @@ import ResetPassword from "./pages/userPages/resetpass.js";
 import CategoryProductsPage from "./pages/productPages/categoryProductsPage.js";
 import ProductPage from "./pages/productPages/productPage.js";
 import CartPage from "./pages/orderPages/cartPage.js";
+import WishlistPage from "./pages/userPages/wishlistPage.js";
 import CheckoutPage from "./pages/orderPages/checkoutPage.js";
 import OrderSuccessPage from "./pages/orderPages/orderSuccessPage.js";
 import OrdersPage from "./pages/orderPages/ordersPage.js";
@@ -78,6 +79,7 @@ const App = () => {
         <Route path="/admin/add-product" element={isAdmin && <AddProduct />} />
         <Route path="/product/:id" element={<ProductPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order-success" element={<OrderSuccessPage />} />
         <Route path="/orders" element={<OrdersPage />} />
