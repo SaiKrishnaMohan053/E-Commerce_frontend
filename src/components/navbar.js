@@ -112,6 +112,14 @@ const Navbar = () => {
     }
   }
 
+  const goToWishlist = () => {
+    if(!user) {
+      navigate("/login");
+    } else {
+      navigate("/wishlist");
+    }
+  }
+
   const handleLogout = () => {
     dispatch(logoutUser());
     navigate("/login");
@@ -163,7 +171,7 @@ const Navbar = () => {
               <ListItemIcon><ShoppingCartIcon /></ListItemIcon>
               <ListItemText primary="My Orders" primaryTypographyProps={{ fontSize: 16 }} />
             </ListItemButton>
-            <ListItemButton onClick={() => navigate("/wishlist")} sx={{ py: 1.5 }}>
+            <ListItemButton onClick={goToWishlist} sx={{ py: 1.5 }}>
               <ListItemIcon><FavoriteBorderIcon /></ListItemIcon>
               <ListItemText primary="Wishlist" primaryTypographyProps={{ fontSize: 16 }} />
             </ListItemButton>
@@ -326,7 +334,7 @@ const Navbar = () => {
             ) : (
               <>
                 <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={goToOrders}>My Orders</Button>
-                <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={() => navigate("/wishlist")}>Wishlist</Button>
+                <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={goToWishlist}>Wishlist</Button>
               </>
             )}
 
