@@ -304,14 +304,16 @@ function AdminAnalytics() {
             </Menu>
           </Box>
           {salesData.length>0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={salesData}>
-                <XAxis dataKey="period"/>
-                <YAxis tickFormatter={v=>`$${v>=1000?(v/1000).toFixed(1)+'k':v}`}/>
-                <Tooltip formatter={v=>`$${v.toFixed(2)}`}/>
-                <Line dataKey="revenue" stroke="#1976d2" strokeWidth={3} dot={{r:4}} />
-              </LineChart>
-            </ResponsiveContainer>
+            <Box width="100%">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={salesData}>
+                  <XAxis dataKey="period"/>
+                  <YAxis tickFormatter={v=>`$${v>=1000?(v/1000).toFixed(1)+'k':v}`}/>
+                  <Tooltip formatter={v=>`$${v.toFixed(2)}`}/>
+                  <Line dataKey="revenue" stroke="#1976d2" strokeWidth={3} dot={{r:4}} />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
           ) : (<Typography>No sales data</Typography>)}
         </Grid>
 
@@ -334,14 +336,16 @@ function AdminAnalytics() {
             </Menu>
           </Box>
           {analytics.salesByCategory.length ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analytics.salesByCategory.slice(0,6)}>
-                <XAxis dataKey="category"/>
-                <YAxis tickFormatter={v=>`$${v>=1000?(v/1000).toFixed(1)+'k':v}`}/>
-                <Tooltip formatter={v=>`$${v.toFixed(2)}`}/>
-                <Bar dataKey="totalRevenue" fill="#f57c00" />
-              </BarChart>
-            </ResponsiveContainer>
+            <Box width="100%">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={analytics.salesByCategory.slice(0,6)}>
+                  <XAxis dataKey="category"/>
+                  <YAxis tickFormatter={v=>`$${v>=1000?(v/1000).toFixed(1)+'k':v}`}/>
+                  <Tooltip formatter={v=>`$${v.toFixed(2)}`}/>
+                  <Bar dataKey="totalRevenue" fill="#f57c00" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
           ):(<Typography>No category data</Typography>)}
         </Grid>
       </Grid>
@@ -350,20 +354,22 @@ function AdminAnalytics() {
         <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>Order Trends</Typography>
           {analytics.orderTrends.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={analytics.orderTrends}>
-                <XAxis dataKey="period" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#1976d2"
-                  strokeWidth={3}
-                  dot={{ r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <Box width="100%">
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={analytics.orderTrends}>
+                  <XAxis dataKey="period" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#1976d2"
+                    strokeWidth={3}
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
           ) : (
             <Typography>No trend data available</Typography>
           )}
@@ -372,47 +378,49 @@ function AdminAnalytics() {
         <Grid item xs={12} md={6}>
           <Typography variant="h6" gutterBottom>Order Status Breakdown</Typography>
           {analytics.statusBreakdown.filter(e => e.status).length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                {(() => {
-                  const statusOrder = [
-                    "Pending",
-                    "Processing",
-                    "Order Ready",
-                    "Delivered",
-                    "Pickedup",
-                    "Cancelled"
-                  ];
-                  const sorted = analytics.statusBreakdown
-                    .filter(e => statusOrder.includes(e.status))
-                    .sort(
-                      (a, b) =>
-                        statusOrder.indexOf(a.status) -
-                        statusOrder.indexOf(b.status)
+            <Box width="100%">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  {(() => {
+                    const statusOrder = [
+                      "Pending",
+                      "Processing",
+                      "Order Ready",
+                      "Delivered",
+                      "Pickedup",
+                      "Cancelled"
+                    ];
+                    const sorted = analytics.statusBreakdown
+                      .filter(e => statusOrder.includes(e.status))
+                      .sort(
+                        (a, b) =>
+                          statusOrder.indexOf(a.status) -
+                          statusOrder.indexOf(b.status)
+                      );
+                    return (
+                      <Pie
+                        data={sorted}
+                        dataKey="count"
+                        nameKey="status"
+                        outerRadius={100}
+                        label
+                      >
+                        {sorted.map((entry, i) => {
+                          const paletteKey =
+                            statusColorMap[entry.status] || "grey";
+                          const fillColor =
+                            theme.palette[paletteKey]?.main ||
+                            theme.palette.grey[500];
+                          return <Cell key={i} fill={fillColor} />;
+                        })}
+                      </Pie>
                     );
-                  return (
-                    <Pie
-                      data={sorted}
-                      dataKey="count"
-                      nameKey="status"
-                      outerRadius={100}
-                      label
-                    >
-                      {sorted.map((entry, i) => {
-                        const paletteKey =
-                          statusColorMap[entry.status] || "grey";
-                        const fillColor =
-                          theme.palette[paletteKey]?.main ||
-                          theme.palette.grey[500];
-                        return <Cell key={i} fill={fillColor} />;
-                      })}
-                    </Pie>
-                  );
-                })()}
-                <Tooltip />
-                <Legend verticalAlign="bottom" />
-              </PieChart>
-            </ResponsiveContainer>
+                  })()}
+                  <Tooltip />
+                  <Legend verticalAlign="bottom" />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
           ) : (
             <Typography>No status data available</Typography>
           )}
@@ -423,23 +431,25 @@ function AdminAnalytics() {
         <Grid item xs={12} md={6}>
           <Typography variant="h6">Top 10 Selling Products</Typography>
           {analytics.topProducts.length > 0 ? (
-            <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie
-                  data={analytics.topProducts}
-                  dataKey="totalSold"
-                  nameKey="name"
-                  outerRadius={100}
-                  label
-                >
-                  {analytics.topProducts.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip/>
-                <Legend verticalAlign="bottom" align="center" height={50} />
-              </PieChart>
-            </ResponsiveContainer>
+            <Box width="100%">
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={analytics.topProducts}
+                    dataKey="totalSold"
+                    nameKey="name"
+                    outerRadius={100}
+                    label
+                  >
+                    {analytics.topProducts.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip/>
+                  <Legend verticalAlign="bottom" align="center" height={50} />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
           ) : (
             <Typography>No top selling products available</Typography>
           )}
@@ -448,23 +458,25 @@ function AdminAnalytics() {
         <Grid item xs={12} md={6} mt={isMobile ? 3 : 0}>
           <Typography variant="h6">Top 10 Highest Spenders</Typography>
           {analytics.activeUsers.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={analytics.activeUsers}
-                  dataKey="totalSpent"
-                  nameKey="name"
-                  outerRadius={100}
-                  label
-                >
-                  {analytics.activeUsers.map((_, i) => (
-                    <Cell key={i} fill={COLORS[(i + 3) % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={v => `$${v.toFixed(2)}`} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+            <Box width="100%">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={analytics.activeUsers}
+                    dataKey="totalSpent"
+                    nameKey="name"
+                    outerRadius={100}
+                    label
+                  >
+                    {analytics.activeUsers.map((_, i) => (
+                      <Cell key={i} fill={COLORS[(i + 3) % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={v => `$${v.toFixed(2)}`} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
           ) : (
             <Typography>No highest spenders data</Typography>
           )}
