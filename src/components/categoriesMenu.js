@@ -1,12 +1,13 @@
-import React, { useState, useRef, memo } from "react";
+import React, { useState, useEffect, useRef, memo } from "react";
 import {
-  Menu,
-  MenuItem,
   Box,
   Typography,
+  Menu,
+  MenuItem,
   IconButton,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import MedicationIcon from "@mui/icons-material/Medication";
@@ -17,130 +18,155 @@ import LightIcon from "@mui/icons-material/Light";
 import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
 import LocalFloristIcon from "@mui/icons-material/LocalFlorist";
 
-const categories = [
-  { name: "Medicines", icon: <MedicationIcon />, subcategories: [] },
-  { name: "Disposables", icon: <VapeFreeIcon />, subcategories: [] },
-  { name: "Supplements", icon: <FitnessCenterIcon />, subcategories: [] },
-  { name: "Incense Sticks", icon: <WhatshotIcon />, subcategories: [] },
-  { name: "Lighters & Butanes", icon: <LightIcon />, subcategories: [] },
-  { name: "Grinders", icon: <PrecisionManufacturingIcon />, subcategories: [] },
-  { name: "Cannabis", icon: <LocalFloristIcon />, subcategories: ["Flower", "Gummies", "Disposables", "Prerolls"] },
-];
+const API_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
-const CategoryItem = memo(({ category, handleOpen, navigate, anchorEl, currentCategory, handleClose }) => (
-  <div key={category.name}>
-    <Typography
-      tabIndex={0}
-      role="button"
-      aria-haspopup={category.subcategories.length > 0}
-      aria-expanded={currentCategory === category}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          category.subcategories.length > 0
-            ? handleOpen(e, category)
-            : navigate(`/category/${category.name}`);
-        }
-      }}
-      sx={{
-        cursor: "pointer",
-        fontWeight: "bold",
-        fontSize: { xs: "14px", sm: "16px" },
-        padding: { xs: "6px", sm: "8px" },
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        "&:hover": { color: "#1976d2" },
-      }}
-      onClick={(e) =>
-        category.subcategories.length > 0
-          ? handleOpen(e, category)
-          : navigate(`/category/${category.name}`)
-      }
-    >
-      {category.icon} {category.name}
-      {category.subcategories.length > 0 && " ▼"}
-    </Typography>
+const FALLBACK_ICON = {
+  Medicines:           <MedicationIcon />,
+  Disposables:         <VapeFreeIcon />,
+  Supplements:         <FitnessCenterIcon />,
+  "Incense Sticks":    <WhatshotIcon />,
+  "Lighters & Butanes":<LightIcon />,
+  Grinders:            <PrecisionManufacturingIcon />,
+  Cannabis:            <LocalFloristIcon />,
+};
 
-    {category.subcategories.length > 0 && (
-      <Menu
-        anchorEl={anchorEl}
-        open={currentCategory === category}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{ mt: 1 }}
+const CategoryItem = memo(({
+  category,
+  handleOpen,
+  handleClose,
+  anchorEl,
+  currentCategory,
+  navigate
+}) => {
+  const hasSubs = category.subCategories.length > 0;
+
+  return (
+    <Box key={category.category}>
+      <Typography
+        tabIndex={0}
+        role="button"
+        aria-haspopup={hasSubs}
+        aria-expanded={currentCategory === category.category}
+        onKeyDown={e => {
+          if (e.key === "Enter" || e.key === " ") {
+            hasSubs
+              ? handleOpen(e, category.category)
+              : navigate(`/category/${category.category}`);
+          }
+        }}
+        onClick={e => {
+          hasSubs
+            ? handleOpen(e, category.category)
+            : navigate(`/category/${category.category}`);
+        }}
+        sx={{
+          whiteSpace: "nowrap",
+          cursor: "pointer",
+          display: "flex",
+          flexShrink: 0,
+          alignItems: "center",
+          gap: 1,
+          fontWeight: "bold",
+          fontSize: { xs: "14px", sm: "16px" },
+          px: { xs: 1, sm: 2 },
+          "&:hover": { color: "#1976d2" },
+        }}
       >
-        {category.subcategories.map((sub) => (
-          <MenuItem
-            key={sub}
-            onClick={() => {
-              navigate(`/category/${category.name}/${sub}`);
-              handleClose();
-            }}
-          >
-            {sub}
-          </MenuItem>
-        ))}
-      </Menu>
-    )}
-  </div>
-));
+        {category.imageUrl
+          ? <Box
+              component="img"
+              src={category.imageUrl}
+              alt={category.category}
+              sx={{ width: 24, height: 24, objectFit: "cover", borderRadius: "4px" }}
+            />
+          : FALLBACK_ICON[category.category] || null
+        }
+        {category.category}
+        {hasSubs && " ▼"}
+      </Typography>
+
+      {hasSubs && (
+        <Menu
+          anchorEl={anchorEl}
+          open={currentCategory === category.category}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          transformOrigin={{ vertical: "top", horizontal: "center" }}
+          sx={{ mt: 1 }}
+        >
+          {category.subCategories.map(sub => (
+            <MenuItem
+              key={sub}
+              onClick={() => {
+                navigate(`/category/${category.category}/${sub}`);
+                handleClose();
+              }}
+            >
+              {sub}
+            </MenuItem>
+          ))}
+        </Menu>
+      )}
+    </Box>
+  );
+});
 
 const CategoriesMenu = () => {
   const navigate = useNavigate();
   const scrollRef = useRef(null);
+
+  const [categories, setCategories] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [currentCategory, setCurrentCategory] = useState(null);
 
-  const handleOpen = (event, category) => {
-    setAnchorEl(event.currentTarget);
-    setCurrentCategory(category);
-  };
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await axios.get(`${API_URL}/api/products/getCategories`);
+        setCategories(data);
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      }
+    })();
+  }, []);
 
+  const handleOpen = (e, cat) => {
+    setAnchorEl(e.currentTarget);
+    setCurrentCategory(cat);
+  };
   const handleClose = () => {
     setAnchorEl(null);
     setCurrentCategory(null);
   };
 
-  const handleScroll = (direction) => {
-    if (!scrollRef.current) return;
-
-    const container = scrollRef.current;
-    const scrollAmount = 200;
-    const maxScroll = container.scrollWidth - container.clientWidth;
-
-    let newScrollLeft =
-      direction === "left"
-        ? Math.max(0, container.scrollLeft - scrollAmount)
-        : Math.min(maxScroll, container.scrollLeft + scrollAmount);
-
-    container.scrollTo({ left: newScrollLeft, behavior: "smooth" });
+  const handleScroll = dir => {
+    const c = scrollRef.current;
+    if (!c) return;
+    const amt = 200;
+    const max = c.scrollWidth - c.clientWidth;
+    const left = dir === "left"
+      ? Math.max(0, c.scrollLeft - amt)
+      : Math.min(max, c.scrollLeft + amt);
+    c.scrollTo({ left, behavior: "smooth" });
   };
 
   return (
     <Box
       sx={{
+        position: "relative",
         display: "flex",
         alignItems: "center",
-        backgroundColor: "#f8f9fa",
-        padding: "10px 0",
-        borderBottom: "1px solid #ddd",
-        position: "relative",
-        maxWidth: "100vw",
+        bgcolor: "#f8f9fa",
+        py: 1,
+        borderBottom: 1,
+        borderColor: "divider",
         overflowX: "hidden",
+        whiteSpace: "nowrap",
       }}
     >
       <IconButton
-        sx={{
-          position: "absolute",
-          left: 0,
-          zIndex: 1,
-          backgroundColor: "white",
-          boxShadow: "1px 1px 5px rgba(0,0,0,0.2)",
-          width: { xs: "30px", sm: "40px" },
-          height: { xs: "30px", sm: "40px" },
-        }}
         onClick={() => handleScroll("left")}
+        sx={{ position: "absolute", left: 0, zIndex: 1, bgcolor: "background.paper" }}
         aria-label="Scroll Left"
       >
         <ArrowBackIosNewIcon fontSize="small" />
@@ -150,26 +176,18 @@ const CategoriesMenu = () => {
         ref={scrollRef}
         sx={{
           display: "flex",
-          gap: "20px",
-          whiteSpace: "nowrap",
+          gap: 2,
+          px: 5,
           overflowX: "auto",
           scrollBehavior: "smooth",
-          padding: "0 50px",
-          scrollbarWidth: "none",
+          whiteSpace: "nowrap",
           "&::-webkit-scrollbar": { display: "none" },
-          overscrollBehaviorX: "contain",
-          WebkitOverflowScrolling: "touch",
-          scrollSnapType: "x mandatory",
-          "& > *": {
-            scrollSnapAlign: "start",
-            flexShrink: 0,
-          },
         }}
       >
-        {categories.map((category) => (
+        {categories.map(cat => (
           <CategoryItem
-            key={category.name}
-            category={category}
+            key={cat.category}
+            category={cat}
             handleOpen={handleOpen}
             handleClose={handleClose}
             anchorEl={anchorEl}
@@ -180,16 +198,8 @@ const CategoriesMenu = () => {
       </Box>
 
       <IconButton
-        sx={{
-          position: "absolute",
-          right: 0,
-          zIndex: 1,
-          backgroundColor: "white",
-          boxShadow: "1px 1px 5px rgba(0,0,0,0.2)",
-          width: { xs: "30px", sm: "40px" },
-          height: { xs: "30px", sm: "40px" },
-        }}
         onClick={() => handleScroll("right")}
+        sx={{ position: "absolute", right: 0, zIndex: 1, bgcolor: "background.paper" }}
         aria-label="Scroll Right"
       >
         <ArrowForwardIosIcon fontSize="small" />

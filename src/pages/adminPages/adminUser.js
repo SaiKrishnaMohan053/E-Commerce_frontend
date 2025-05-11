@@ -3,8 +3,8 @@ import {
   Box, Button, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, Dialog, DialogActions,
   DialogContent, DialogTitle, TextField, Typography, IconButton,
-  CircularProgress, DialogContentText, useMediaQuery,
-  InputAdornment
+  DialogContentText, useMediaQuery,
+  InputAdornment, Skeleton, CircularProgress
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,12 +13,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useTheme } from "@mui/material/styles";
-
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+
 import {
   fetchUsers, approveUser, rejectUser,
   deleteUser, editUser
 } from "../../store/slices/authSlice.js";
+import { showAlert } from "../../store/slices/alertSlice.js";
 
 const cellStyle = {
   fontSize: { xs: "12px", sm: "13px" },
@@ -30,7 +31,7 @@ const cellStyle = {
 
 const AdminManagement = () => {
   const dispatch = useDispatch();
-  const { users, loading } = useSelector((state) => state.auth);
+  const { users, usersLoading } = useSelector((state) => state.auth);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -42,26 +43,70 @@ const AdminManagement = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [snack, setSnack] = useState({ open: false, message: "", severity: "success" });
   const [searchTerm, setSearchTerm] = useState("");
+  const [rowDialogOpen, setRowDialogOpen] = useState(false);
+  const [rowData, setRowData] = useState(null);
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = users
+  .filter(user => {
     const term = searchTerm.toLowerCase();
     return (
       user.storeName?.toLowerCase().includes(term) ||
       user.ownerName?.toLowerCase().includes(term) ||
       user.address?.toLowerCase().includes(term)
     );
+  })
+  .sort((a, b) => {
+    return a.isApproved === b.isApproved ? 0 : a.isApproved ? 1 : -1;
   });
+
+  const showRowDialog = (user) => {
+    setRowData(user ?? "_");
+    setRowDialogOpen(true);
+  }
+
+  if (usersLoading) {
+    return (
+      <TableContainer component={Paper} sx={{ maxHeight: "80vh", overflow: "auto" }}>
+        <Table stickyHeader size={isMobile ? "small" : "medium"}>
+          <TableHead sx={{ backgroundColor: "#f0f0f0" }}>
+            <TableRow>
+              {[
+                "Store Name", "Owner Name", "Email",
+                "Phone", "Address", "EIN",
+                "Sales Tax License","ABC License",
+                "Status","Actions"
+                ].map(col => (
+                <TableCell key={col}>
+                  <Skeleton variant="text" width={80} />
+                  </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, row) => (
+              <TableRow hover key={row}>
+                {Array.from({ length: 10 }).map((__, cell) => (
+                  <TableCell key={cell}>
+                    <Skeleton variant="rectangular" height={24} />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    )
+  }
 
   const handleApprove = async (userId) => {
     setSubmitting(true);
     await dispatch(approveUser(userId));
-    setSnack({ open: true, message: "User approved successfully", severity: "success" });
+    dispatch(showAlert({ message: "User approved successfully", severity: "success" }));
     dispatch(fetchUsers());
     setSubmitting(false);
   };
@@ -70,7 +115,7 @@ const AdminManagement = () => {
     if (rejectUserId && rejectReason.trim()) {
       setSubmitting(true);
       await dispatch(rejectUser({ userId: rejectUserId, reason: rejectReason }));
-      setSnack({ open: true, message: "User removed and notified", severity: "info" });
+      dispatch(showAlert({ message: "User rejected successfully", severity: "error" }));
       setRejectReason("");
       setRejectUserId(null);
       setRejectDialogOpen(false);
@@ -82,7 +127,7 @@ const AdminManagement = () => {
   const handleDeleteConfirm = async () => {
     setSubmitting(true);
     await dispatch(deleteUser(deleteUserId));
-    setSnack({ open: true, message: "User deleted successfully", severity: "warning" });
+    dispatch(showAlert({ message: "User deleted successfully", severity: "error" }));
     setDeleteUserId(null);
     setDeleteDialogOpen(false);
     dispatch(fetchUsers());
@@ -97,13 +142,13 @@ const AdminManagement = () => {
   const handleEditSave = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(selectedUser.email)) {
-      setSnack({ open: true, message: "Invalid email format.", severity: "error" });
+      dispatch(showAlert({ message: "Please enter a valid email address.", severity: "error" }));
       return;
     }
     setSubmitting(true);
     await dispatch(editUser(selectedUser));
     setEditDialogOpen(false);
-    setSnack({ open: true, message: "User updated successfully", severity: "success" });
+    dispatch(showAlert({ message: "User updated successfully", severity: "success" }));
     dispatch(fetchUsers());
     setSubmitting(false);
   };
@@ -141,41 +186,85 @@ const AdminManagement = () => {
         }}
       />
 
-      {loading ? (
-        <Typography>Loading users...</Typography>
-      ) : (
-        <TableContainer component={Paper} sx={{ maxHeight: "80vh", overflow: "auto" }}>
-          <Table stickyHeader size={isMobile ? "small" : "medium"}>
-            <TableHead sx={{ backgroundColor: "#f0f0f0" }}>
-              <TableRow>
-                <TableCell><b>Store Name</b></TableCell>
-                <TableCell><b>Owner Name</b></TableCell>
-                <TableCell><b>Email</b></TableCell>
-                <TableCell><b>Phone</b></TableCell>
-                <TableCell><b>Address</b></TableCell>
-                <TableCell><b>EIN</b></TableCell>
-                <TableCell><b>Sales Tax License</b></TableCell>
-                <TableCell><b>ABC License</b></TableCell>
-                <TableCell><b>Status</b></TableCell>
-                <TableCell><b>Actions</b></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredUsers.map((user) => (
-                <MemoizedUserRow
-                  key={user._id}
-                  user={user}
-                  handleApprove={handleApprove}
-                  handleReject={handleOpenRejectDialog}
-                  handleEditClick={handleEditClick}
-                  handleDelete={handleOpenDeleteDialog}
-                  submitting={submitting}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+      <TableContainer component={Paper} sx={{ maxHeight: "80vh", overflow: "auto" }}>
+        <Table stickyHeader size={isMobile ? "small" : "medium"}>
+          <TableHead sx={{ backgroundColor: "#f0f0f0" }}>
+            <TableRow>
+              <TableCell><b>Store Name</b></TableCell>
+              <TableCell><b>Owner Name</b></TableCell>
+              <TableCell><b>Email</b></TableCell>
+              <TableCell><b>Phone</b></TableCell>
+              <TableCell><b>Address</b></TableCell>
+              <TableCell><b>EIN</b></TableCell>
+              <TableCell><b>Sales Tax License</b></TableCell>
+              <TableCell><b>ABC License</b></TableCell>
+              <TableCell><b>Status</b></TableCell>
+              <TableCell><b>Actions</b></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredUsers.map((user) => (
+              <MemoizedUserRow
+                key={user._id}
+                user={user}
+                handleApprove={handleApprove}
+                handleReject={handleOpenRejectDialog}
+                handleEditClick={handleEditClick}
+                handleDelete={handleOpenDeleteDialog}
+                submitting={submitting}
+                showRowDialog={showRowDialog}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Dialog
+        open={rowDialogOpen}
+        onClose={() => setRowDialogOpen(false)}
+        fullWidth
+      >
+        <DialogTitle>User Details</DialogTitle>
+        <DialogContent dividers>
+          {rowData && (
+            <>
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Store Name
+                </Typography>
+                <Typography>{rowData.storeName || '—'}</Typography>
+              </Box>
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Owner Name
+                </Typography>
+                <Typography>{rowData.ownerName || '—'}</Typography>
+              </Box>
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Email
+                </Typography>
+                <Typography>{rowData.email || '—'}</Typography>
+              </Box>
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Phone
+                </Typography>
+                <Typography>{rowData.phoneNumber || '—'}</Typography>
+              </Box>
+              <Box mb={2}>
+                <Typography variant="subtitle2" color="textSecondary">
+                  Address
+                </Typography>
+                <Typography>{rowData.address || '—'}</Typography>
+              </Box>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setRowDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
         <DialogTitle>Edit User</DialogTitle>
@@ -231,8 +320,8 @@ const AdminManagement = () => {
   );
 };
 
-const MemoizedUserRow = memo(({ user, handleApprove, handleReject, handleEditClick, handleDelete, submitting }) => (
-  <TableRow hover>
+const MemoizedUserRow = memo(({ user, showRowDialog, handleApprove, handleReject, handleEditClick, handleDelete, submitting }) => (
+  <TableRow hover sx={{ cursor: "pointer" }} onClick={() => showRowDialog(user)}>
     <TableCell sx={cellStyle}>{user.storeName || "—"}</TableCell>
     <TableCell sx={cellStyle}>{user.ownerName || "—"}</TableCell>
     <TableCell sx={{ ...cellStyle }}>

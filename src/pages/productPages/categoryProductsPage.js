@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Grid,
@@ -14,8 +14,10 @@ import {
   Card,
   CardContent,
   Skeleton,
+  Button,
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
+import AddIcon from "@mui/icons-material/Add";
 
 import ProductCard from "../../components/productCard/productCard.js";
 import {
@@ -28,6 +30,7 @@ import { showAlert } from "../../store/slices/alertSlice";
 
 const CategoryProducts = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { products, loading, error, totalPages } = useSelector((state) => state.product);
   const { category, subCategory } = useParams();
   const subCategories = subCategory;
@@ -126,15 +129,37 @@ const CategoryProducts = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography
-        variant="h5"
+      <Box
         mb={3}
-        textAlign="center"
-        fontWeight="bold"
-        sx={{ fontSize: { xs: "1.3rem", sm: "1.6rem", md: "1.8rem" } }}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
       >
-        {category} {subCategory ? `- ${subCategory}` : ""}
-      </Typography>
+        <Typography
+          variant="h5"
+          fontWeight="bold"
+          sx={{ fontSize: { xs: "1.3rem", sm: "1.6rem", md: "1.8rem" } }}
+        >
+          {category} {subCategory ? `- ${subCategory}` : ""}
+        </Typography>
+
+        {isAdmin && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              const params = new URLSearchParams();
+              params.set("category", category);
+              if (subCategories) params.set("subCategories", subCategories);
+              navigate(`/admin/add-product?${params.toString()}`);
+            }}
+          >
+            Add Product
+          </Button>
+        )}
+      </Box>
 
       {loading ? (
         <Box

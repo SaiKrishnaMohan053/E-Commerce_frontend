@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -14,6 +14,7 @@ import {
   Grid,
 } from "@mui/material";
 import { useDispatch } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 
 import { createProduct } from "../../store/slices/productSlice";
 import { showAlert } from "../../store/slices/alertSlice";
@@ -21,6 +22,9 @@ import { showAlert } from "../../store/slices/alertSlice";
 const AddProduct = () => {
   const dispatch = useDispatch();
 
+  const [searchParams] = useSearchParams();
+  const prefillCategory = searchParams.get("category") || "";
+  const prefillSubCategories = searchParams.get("subCategories") || "";
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [subCategories, setSubCategories] = useState("");
@@ -34,6 +38,11 @@ const AddProduct = () => {
   const [price, setPrice] = useState(0);
   const [files, setFiles] = useState([]);
   const [isIndividualPricing, setIsIndividualPricing] = useState(false);
+
+  useEffect(() => {
+    setCategory(prefillCategory);
+    setSubCategories(prefillSubCategories);
+  }, [prefillCategory, prefillSubCategories]);  
 
   const handleFlavorChange = (index, field, value) => {
     const newFlavors = [...flavors];

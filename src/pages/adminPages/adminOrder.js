@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -16,6 +16,7 @@ import {
   Chip,
   Stack,
   Pagination,
+  TextField,
 } from "@mui/material";
 import { fetchAllOrders } from "../../store/slices/orderSlice";
 
@@ -32,13 +33,14 @@ const AdminOrdersPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { allOrders, loading, error, page, totalPages } = useSelector((state) => state.order);
+  const [searchTerm, setSearchTerm] = useState("");
   
   const formatted = useMemo(() => {
     if (!Array.isArray(allOrders)) return [];
     const dateOpts = { year: "numeric", month: "short", day: "numeric" };
     return allOrders.map(o => ({
       ...o,
-      date: new Date(o.createdAt).toLocaleDateString(undefined, dateOpts),
+      date: new Date(o.createdAt).toISOString(undefined, dateOpts).split('T')[0],
       total: o.orderItems.reduce((sum, i) => sum + i.qty * i.price, 0)
     }));
   }, [allOrders]);
@@ -50,6 +52,13 @@ const AdminOrdersPage = () => {
   const onPageChange = (_, value) => {
     dispatch(fetchAllOrders({ page: value, limit: 10 }));
   };
+
+  const filtered = useMemo(() => {
+    if (!searchTerm.trim()) return formatted;
+    return formatted.filter((o) =>
+      o.user.storeName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [formatted, searchTerm]);
 
   if (loading) {
     return (
@@ -73,7 +82,16 @@ const AdminOrdersPage = () => {
   return (
     <Stack spacing={3} maxWidth={1000} mx="auto" py={4}>
       <Typography variant="h4" mb={3}>All Orders (Admin)</Typography>
-      {formatted.length === 0 ? (
+
+      <TextField
+        placeholder="Search by Store Name…"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        size="small"
+        fullWidth
+      />
+
+      {filtered.length === 0 ? (
         <Typography>No orders to display.</Typography>
       ) : (
         <>
@@ -84,6 +102,7 @@ const AdminOrdersPage = () => {
                   <TableRow>
                     <TableCell>Order #</TableCell>
                     <TableCell>Date</TableCell>
+                    <TableCell align="right">Store Name</TableCell>
                     <TableCell align="right">Total</TableCell>
                     <TableCell>Method</TableCell>
                     <TableCell>Status</TableCell>
@@ -91,10 +110,11 @@ const AdminOrdersPage = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {formatted.map((o) => (
+                  {filtered.map((o) => (
                     <TableRow key={o._id} hover>
                       <TableCell>{o._id}</TableCell>
                       <TableCell>{o.date}</TableCell>
+                      <TableCell align="right">{o.user.storeName}</TableCell>
                       <TableCell align="right">${o.total.toFixed(2)}</TableCell>
                       <TableCell>{o.orderMethod}</TableCell>
                       <TableCell>

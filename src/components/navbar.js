@@ -2,13 +2,10 @@ import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   IconButton,
   TextField,
   InputAdornment,
-  Menu,
-  MenuItem,
   Box,
   Badge,
   Drawer,
@@ -16,17 +13,13 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider,
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import SearchIcon from "@mui/icons-material/Search";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MenuIcon from "@mui/icons-material/Menu";
-import AddIcon from "@mui/icons-material/Add";
-import ListAltIcon from "@mui/icons-material/ListAlt";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
@@ -52,7 +45,6 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [adminMenuAnchor, setAdminMenuAnchor] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -125,14 +117,6 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  const handleAdminMenuClick = (event) => {
-    setAdminMenuAnchor(event.currentTarget);
-  };
-
-  const handleAdminMenuClose = () => {
-    setAdminMenuAnchor(null);
-  };
-
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
@@ -148,24 +132,8 @@ const Navbar = () => {
       role="presentation"
       onClick={toggleDrawer(false)}
     >
-      <List>
-        {isAdmin ? (
-          <>
-            <Typography variant="h6" sx={{ px: 2, py: 1, color: "#1976d2" }}>Admin</Typography>
-            <ListItemButton onClick={() => navigate("/admin")} sx={{ py: 1.5 }}>
-              <ListItemIcon><AccountCircleIcon color="primary" /></ListItemIcon>
-              <ListItemText primary="Users" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItemButton>
-            <ListItemButton onClick={() => navigate("/admin/add-product")} sx={{ py: 1.5 }}>
-              <ListItemIcon><AddIcon color="primary" /></ListItemIcon>
-              <ListItemText primary="Add a Product" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItemButton>
-            <ListItemButton onClick={() => navigate("/admin/orders")} sx={{ py: 1.5 }}>
-              <ListItemIcon><ListAltIcon color="primary" /></ListItemIcon>
-              <ListItemText primary="orders" primaryTypographyProps={{ fontSize: 16 }} />
-            </ListItemButton>
-          </>
-        ) : (
+      <List>    
+        {!isAdmin && (
           <>
             <ListItemButton onClick={goToOrders} sx={{ py: 1.5 }}>
               <ListItemIcon><ShoppingCartIcon /></ListItemIcon>
@@ -175,16 +143,11 @@ const Navbar = () => {
               <ListItemIcon><FavoriteBorderIcon /></ListItemIcon>
               <ListItemText primary="Wishlist" primaryTypographyProps={{ fontSize: 16 }} />
             </ListItemButton>
+            <ListItemButton onClick={goToCart} sx={{ py: 1.5 }}>
+              <ListItemIcon><ShoppingCartIcon color="error" /></ListItemIcon>
+              <ListItemText primary={`Cart (${cartItemCount})`} primaryTypographyProps={{ fontSize: 16 }} />
+            </ListItemButton>
           </>
-        )}
-  
-        <Divider sx={{ my: 1 }} />
-  
-        {!isAdmin && (
-          <ListItemButton onClick={goToCart} sx={{ py: 1.5 }}>
-            <ListItemIcon><ShoppingCartIcon color="error" /></ListItemIcon>
-            <ListItemText primary={`Cart (${cartItemCount})`} primaryTypographyProps={{ fontSize: 16 }} />
-          </ListItemButton>
         )}
   
         {user ? (
@@ -214,7 +177,7 @@ const Navbar = () => {
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
       <Box
           sx={{ width: 120, height: 40, cursor: "pointer" }}
-          onClick={() => navigate("/")}
+          onClick={() => isAdmin ? navigate("/admin-dashboard") : navigate("/user-dashboard")}
         >
           <img src="" alt="Your Brand" style={{ width: 120, height: 40 }} />
       </Box>
@@ -311,39 +274,16 @@ const Navbar = () => {
           )}
         {!isMobile && (
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {isAdmin ? (
-              <>
-                <Button
-                  color="inherit"
-                  onClick={handleAdminMenuClick}
-                  endIcon={<ArrowDropDownIcon />}
-                  sx={{ textTransform: "none", mr: 2, fontWeight: "bold" }}
-                >
-                  Admin
-                </Button>
-                <Menu
-                  anchorEl={adminMenuAnchor}
-                  open={Boolean(adminMenuAnchor)}
-                  onClose={handleAdminMenuClose}
-                >
-                  <MenuItem onClick={() => { navigate("/admin"); handleAdminMenuClose(); }}>Users</MenuItem>
-                  <MenuItem onClick={() => { navigate("/admin/add-product"); handleAdminMenuClose(); }}>Add a Product</MenuItem>
-                  <MenuItem onClick={() => { navigate("/admin/orders"); handleAdminMenuClose(); }}>Orders</MenuItem>
-                </Menu>
-              </>
-            ) : (
+            {!isAdmin && (
               <>
                 <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={goToOrders}>My Orders</Button>
                 <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={goToWishlist}>Wishlist</Button>
+                <IconButton color="inherit" sx={{ mr: 2 }} onClick={goToCart}>
+                  <Badge badgeContent={cartItemCount} color="error">
+                    <ShoppingCartIcon fontSize="large" />
+                  </Badge>
+                </IconButton>
               </>
-            )}
-
-            {!isAdmin && (
-              <IconButton color="inherit" sx={{ mr: 2 }} onClick={goToCart}>
-                <Badge badgeContent={cartItemCount} color="error">
-                  <ShoppingCartIcon fontSize="large" />
-                </Badge>
-              </IconButton>
             )}
 
             {user ? (

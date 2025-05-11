@@ -12,6 +12,11 @@ This is the frontend e-commerce web application. It is built using React.js and 
 
   * Register & login with JWT-based authentication
   * Profile view & update
+* **Dynamic Categories Menu**
+
+  * Fetched categories & subcategories from backend API (`getCategories` controller)
+  * Displayed icons per category (from S3 imageUrl or default mapping)
+  * Horizontally scrollable menu with accessible keyboard/ARIA support
 * **Product Browsing**
 
   * View product details (flavored & non-flavored) with **alphabetically sorted** flavor selectors
@@ -65,6 +70,7 @@ This is the frontend e-commerce web application. It is built using React.js and 
   * Deal & discount management
 * **User Management**
 
+  * Clickable rows triggering a dialog showing store, owner, email, phone, address details
   * Approve/reject users, view/edit/delete users
   * Email notifications on rejection
 * **Order Workflows**
@@ -73,6 +79,15 @@ This is the frontend e-commerce web application. It is built using React.js and 
   * Approve or reject order cancellations
   * Track status: Processing → Ready → Delivered → Picked Up → Cancelled
   * Upload invoices & download links
+
+**Admin Analytics & Reporting**
+  * Consolidated daily, weekly, monthly, yearly, and custom‐range sales summary in a unified chart
+  * Export to Excel with shared `exportXlsx()` utility and dynamic meta rows
+  * Order trends and status‐breakdown charts integrated (line + pie charts)
+  * Color‐mapped status breakdown using MUI theme palettes
+  * `makeDateRange()` for period calculations
+  * `exportXlsx()` helper for all Excel exports (summary, category reports)
+  * Single `DateRangeBox` component handling both summary & category custom ranges
 
 ### UI/UX
 
@@ -119,5 +134,5 @@ REACT_APP_API_BASE_URL=https://your-backend.example.com
 
 ## Maintained By
 
-**Sai Krishna Mohan Kolla**
+**Sai Krishna Mohan Kolla**  
 Full Stack Developer – MERN | AWS | CI/CD

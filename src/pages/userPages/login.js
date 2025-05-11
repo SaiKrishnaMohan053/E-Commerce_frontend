@@ -19,6 +19,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 import { loginUser, forgotPassword, clearMessage, clearError } from "../../store/slices/authSlice.js";
 import { showAlert } from "../../store/slices/alertSlice.js";
@@ -36,14 +37,20 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      if (!user.isApproved) {
-        dispatch(showAlert({ message: "Login successful!", severity: "success" }));
+    if (user?.token) {
+      const decoded = jwtDecode(user.token);
+      if (!decoded.isApproved) {
+        dispatch(showAlert({ message: "Please wait for admin approval.", severity: "info" }));
+        return;
+      } 
+      
+      if (decoded.isAdmin) {
+        navigate("/admin-dashboard");
       } else {
-        navigate("/");
+        navigate("/user-dashboard");
       }
     }
-  }, [user, navigate]);
+  }, [user, navigate, dispatch]); 
 
   useEffect(() => {
     if (error) {
@@ -63,16 +70,33 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       dispatch(showAlert({ message: "Please enter a valid email address.", severity: "error" }));
       return;
     }
-
-    dispatch(loginUser(formData));
-    dispatch(showAlert({ message: "Login successful!", severity: "success" }));
-  };
+  
+    dispatch(loginUser(formData))
+      .unwrap()
+      .then((res) => {
+        dispatch(showAlert({ message: "Login successful!", severity: "success" }));
+  
+        const decoded = jwtDecode(res.token);
+  
+        if (!decoded.isApproved) {
+          dispatch(showAlert({ message: "Please wait for admin approval.", severity: "info" }));
+          return;
+        }
+  
+        if (decoded.isAdmin) {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/user-dashboard");
+        }
+      })
+      .catch((err) => dispatch(showAlert({ message: err, severity: "error" })));
+  };  
 
   const handleForgotSubmit = () => {
     if (!forgotEmail) {

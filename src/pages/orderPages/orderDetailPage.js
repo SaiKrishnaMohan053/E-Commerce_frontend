@@ -117,7 +117,7 @@ const OrderDetailPage = () => {
   }
   return (
     <Box maxWidth={800} mx="auto" py={4} px={2}>
-      <Button variant="text" onClick={() => navigate(isAdmin ? '/admin/orders' : '/orders')}>
+      <Button variant="text" onClick={() => navigate(isAdmin ? '/admin-dashboard' : '/orders')}>
         &laquo; Back to Orders
       </Button>
 

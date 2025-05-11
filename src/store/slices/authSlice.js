@@ -40,9 +40,19 @@ const getUserIdFromToken = (token) => {
 export const loginUser = createAsyncThunk("auth/login", async (userData, { rejectWithValue }) => {
   try {
     const { data } = await axios.post(`${API_BASE_URL}/api/users/login`, userData);
-    localStorage.setItem("user", JSON.stringify(data));
-    setAuthHeader(data.token);
-    return data;
+    
+    const userDt = {
+      token: data.token,
+      ...data.user,
+    };
+
+    if (data.token) {
+      localStorage.setItem("user", JSON.stringify(userDt));
+      setAuthHeader(data.token);
+    }
+    console.log(userDt);
+    
+    return userDt;
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || "Login failed. Please try again.");
   }
@@ -215,6 +225,7 @@ const authSlice = createSlice({
   initialState: {
     user,
     loading: false,
+    usersLoading: false,
     error: null,
     message: null, 
     users: [],
@@ -307,15 +318,15 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
       .addCase(fetchUsers.pending, (state) => {
-        state.loading = true;
+        state.usersLoading = true;
         state.error = null;
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.loading = false;
+        state.usersLoading = false;
         state.users = action.payload;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
-        state.loading = false;
+        state.usersLoading = false;
         state.error = action.payload;
       })
       .addCase(approveUser.fulfilled, (state, action) => {

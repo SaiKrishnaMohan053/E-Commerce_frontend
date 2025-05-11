@@ -406,7 +406,7 @@ const ProductCard = ({
         minHeight: { xs: "auto", sm: 380, md: 420 },
       }}
     >
-      <IconButton
+      {!isAdmin && <IconButton
         onClick={() =>
           inWishlist
             ? dispatch(removeWishlistItem(product._id))
@@ -425,7 +425,7 @@ const ProductCard = ({
         ) : (
           <FavoriteBorderIcon />
         )}
-      </IconButton>
+      </IconButton>}
       <CardContent
         sx={{
           flexGrow: 1,
