@@ -385,7 +385,7 @@ function AdminAnalytics() {
           <Typography variant="h6" gutterBottom>Order Status Breakdown</Typography>
           {analytics.statusBreakdown.filter(e => e.status).length > 0 ? (
             <Box width="100%">
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={300} style={{ outline: "none" }}>
                 <PieChart>
                   {(() => {
                     const statusOrder = [
@@ -410,6 +410,8 @@ function AdminAnalytics() {
                         nameKey="status"
                         outerRadius={100}
                         label
+                        activeIndex={-1}
+                        activeShape={false}
                       >
                         {sorted.map((entry, i) => {
                           const paletteKey =
@@ -437,8 +439,8 @@ function AdminAnalytics() {
         <Grid item xs={12} md={6}>
           <Typography variant="h6">Top 10 Selling Products</Typography>
           {analytics.topProducts.length > 0 ? (
-            <Box width="100%">
-              <ResponsiveContainer width="100%" height={350}>
+            <Box width="100%" mb={isMobile ? 4 : 0}>
+              <ResponsiveContainer width="100%" height={300} style={{ outline: "none" }}>
                 <PieChart>
                   <Pie
                     data={analytics.topProducts}
@@ -446,13 +448,14 @@ function AdminAnalytics() {
                     nameKey="name"
                     outerRadius={100}
                     label
+                    activeIndex={-1}
+                    activeShape={false}
                   >
                     {analytics.topProducts.map((_, i) => (
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip/>
-                  <Legend verticalAlign="bottom" align="center" height={50} />
                 </PieChart>
               </ResponsiveContainer>
             </Box>
@@ -461,11 +464,11 @@ function AdminAnalytics() {
           )}
         </Grid>
 
-        <Grid item xs={12} md={6} mt={isMobile ? 3 : 0}>
+        <Grid item xs={12} md={6} mt={isMobile ? 4 : 0}>
           <Typography variant="h6">Top 10 Highest Spenders</Typography>
           {analytics.activeUsers.length > 0 ? (
             <Box width="100%">
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={300} style={{ outline: "none" }}>
                 <PieChart>
                   <Pie
                     data={analytics.activeUsers}
@@ -473,13 +476,14 @@ function AdminAnalytics() {
                     nameKey="name"
                     outerRadius={100}
                     label
+                    activeIndex={-1}
+                    activeShape={false}
                   >
                     {analytics.activeUsers.map((_, i) => (
                       <Cell key={i} fill={COLORS[(i + 3) % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={v => `$${v.toFixed(2)}`} />
-                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </Box>
