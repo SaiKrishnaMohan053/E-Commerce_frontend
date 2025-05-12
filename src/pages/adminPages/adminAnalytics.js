@@ -59,6 +59,7 @@ function AdminAnalytics() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const { user } = useSelector((state) => state.auth);
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState({
     sales: {},
@@ -103,6 +104,8 @@ function AdminAnalytics() {
           statusBreakdown: statusRes.data || [],
         });
       } catch (err) {
+        console.log(err);
+        setError(err.response?.data?.message || err.message);        
         console.error("Analytics load failed:", err);
       } finally {
         setLoading(false);
@@ -110,6 +113,8 @@ function AdminAnalytics() {
     })();
   }, [user]);
 
+  if(error) return <div>{error}</div>
+  
   function makeDateRange(period, fromStr, toStr) {
     let fromDate, toDate = new Date();
     if (period === 'custom' && fromStr && toStr) {
