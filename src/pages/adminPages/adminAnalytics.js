@@ -52,7 +52,7 @@ const COLORS = [
   "#0097a7", 
   "#7cb342"  
 ];
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 function AdminAnalytics() {
   const theme = useTheme();
@@ -114,7 +114,7 @@ function AdminAnalytics() {
   }, [user]);
 
   if(error) return <div>{error}</div>
-  
+
   function makeDateRange(period, fromStr, toStr) {
     let fromDate, toDate = new Date();
     if (period === 'custom' && fromStr && toStr) {
