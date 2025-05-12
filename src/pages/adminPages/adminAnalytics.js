@@ -30,6 +30,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import DateRangeBox from "../../components/datePickerBox";
+import { useSelector } from "react-redux";
 
 const statusColorMap = {
   Pending:     "default",
@@ -57,7 +58,7 @@ function AdminAnalytics() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const token = JSON.parse(localStorage.getItem("user"))?.token;
+  const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState({
     sales: {},
@@ -77,7 +78,7 @@ function AdminAnalytics() {
   useEffect(() => {
     (async () => {
       try {
-        const headers = { Authorization: `Bearer ${token}` };
+        const headers = { Authorization: `Bearer ${user?.token}` };
         const [sumRes, catRes, prodRes, spendRes, trendRes, statusRes] = await Promise.all([
           axios.get(`${API_URL}/api/admin/summary`, { headers }),
           axios.get(`${API_URL}/api/admin/sales-by-category/monthly`, { headers }),
@@ -107,7 +108,7 @@ function AdminAnalytics() {
         setLoading(false);
       }
     })();
-  }, [token]);
+  }, [user]);
 
   function makeDateRange(period, fromStr, toStr) {
     let fromDate, toDate = new Date();
@@ -164,7 +165,7 @@ function AdminAnalytics() {
     const { fromISO, toISO } = makeDateRange('custom', fromStr, toStr);
     const { data } = await axios.get(
       `${API_URL}/api/admin/summary/${fromISO}/${toISO}`,
-      { headers:{ Authorization:`Bearer ${token}` }}
+      { headers:{ Authorization:`Bearer ${user?.token}` }}
     );
     exportXlsx({
       metaRows: [
@@ -193,7 +194,7 @@ function AdminAnalytics() {
   
   
   async function exportCategoryReport(period, fromStr, toStr) {
-    const headers = { Authorization: `Bearer ${token}` };
+    const headers = { Authorization: `Bearer ${user?.token}` };
     const { fromISO, toISO } = makeDateRange(period, fromStr, toStr);
     const url = period==='custom'
       ? `${API_URL}/api/admin/sales-by-category/custom/${fromISO}/${toISO}`
