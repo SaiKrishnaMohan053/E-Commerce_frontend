@@ -35,12 +35,17 @@ const ProductCard = ({
   onEdit,
   onUpdateStock,
   onDelete,
+  flavorAlerts = [],
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => Boolean(state.auth.user));
   const cartItems = useSelector((state) => state.cart.items);
   const inWishlist = useSelector((state) => state.wishlist.items.some(item => item._id === product._id));
+
+  const hasFlavor = flavorAlerts.length > 1;
+  const [selIdx, setSelIdx] = useState(0);
+  const selected = flavorAlerts[selIdx] || {};
 
   const sortFlavorsAZ = (flavors = []) =>
     [...flavors].sort((a, b) =>
@@ -669,6 +674,89 @@ const ProductCard = ({
           {`Limit: ${purchaseLimit}`}
         </Typography>
       )}
+
+      {isAdmin && (
+          <Box mt={2}>
+            {hasFlavors
+              ? (
+                <FormControl fullWidth size="small">
+                  <InputLabel id={`flavor-label-${product._id}`}>
+                    Flavor & Metrics
+                  </InputLabel>
+                  <Select
+                    labelId={`flavor-label-${product._id}`}
+                    value={selIdx}
+                    label="Flavor & Metrics"
+                    onChange={e => setSelIdx(e.target.value)}
+                  >
+                    {flavorAlerts.map((f, idx) => (
+                      <MenuItem
+                        key={f.flavorName || idx}
+                        value={idx}
+                        sx={{ display: "flex", justifyContent: "space-between" }}
+                      >
+                        <Box component="span">{f.flavorName || "Default"}</Box>
+                        <Box component="span" textAlign="right">
+                          <Typography variant="caption">
+                            Avg: {Math.round(f.avgWeeklySales)}
+                          </Typography>
+                          &nbsp;|&nbsp;
+                          <Typography variant="caption">
+                            Reorder: {Math.round(f.reorderPoint)}
+                          </Typography>
+                          &nbsp;|&nbsp;
+                          <Typography
+                            variant="caption"
+                            component="span"
+                            sx={{
+                              color:
+                                f.salesVelocity === "Fast"
+                                  ? "green"
+                                  : f.salesVelocity === "Slow"
+                                    ? "red"
+                                    : "gray",
+                            }}
+                          >
+                            {f.salesVelocity}
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : (
+                <Box>
+                  <Typography variant="caption">
+                    Avg Weekly Sold:&nbsp;
+                    <strong>{Math.round(selected.avgWeeklySales)}</strong>
+                  </Typography>
+                  <br />
+                  <Typography variant="caption">
+                    Reorder Point:&nbsp;
+                    <strong>{Math.round(selected.reorderPoint)}</strong>
+                  </Typography>
+                  <br />
+                  <Typography variant="caption">
+                    Velocity:&nbsp;
+                    <strong
+                      style={{
+                        color:
+                          selected.salesVelocity === "Fast"
+                            ? "green"
+                            : selected.salesVelocity === "Slow"
+                              ? "red"
+                              : "gray",
+                      }}
+                    >
+                      {selected.salesVelocity}
+                    </strong>
+                  </Typography>
+                </Box>
+              )
+            }
+          </Box>
+        )}
+
       <EditModal
         open={editOpen}
         handleClose={() => setEditOpen(false)}

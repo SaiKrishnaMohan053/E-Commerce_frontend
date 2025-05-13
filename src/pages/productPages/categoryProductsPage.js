@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import AddIcon from "@mui/icons-material/Add";
+import axios from "axios";
 
 import ProductCard from "../../components/productCard/productCard.js";
 import {
@@ -28,6 +29,8 @@ import {
 } from "../../store/slices/productSlice";
 import { showAlert } from "../../store/slices/alertSlice";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 const CategoryProducts = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -35,8 +38,8 @@ const CategoryProducts = () => {
   const { category, subCategory } = useParams();
   const subCategories = subCategory;
 
+  const [restockAlerts, setRestockAlerts] = useState([]);
   const [sortOption, setSortOption] = useState("");
-
   const [searchParams, setSearchParams] = useSearchParams();
   const highlightId = searchParams.get("highlight") || null;
   const initialPage = Number(searchParams.get("page")) || 1;
@@ -86,6 +89,32 @@ const CategoryProducts = () => {
       dispatch(showAlert({ message: "Invalid token", severity: "error" }));
     }
   }
+
+  useEffect(() => {
+    async function loadAlerts() {
+      try {
+        const { data } = await axios.get(`${API_URL}/api/admin/restock-alerts`);
+        setRestockAlerts(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    if (isAdmin) loadAlerts();
+  }, [isAdmin]);
+  
+  const alertsByProduct = React.useMemo(() => {
+    return restockAlerts.reduce((acc, alert) => {
+      const id = alert.product._id;
+      if (!acc[id]) acc[id] = [];
+      acc[id].push({
+        flavorName: alert.flavorName || 'Default',
+        avgWeeklySales: Math.round(alert.avgWeeklySales),
+        reorderPoint:   Math.round(alert.reorderPoint),
+        salesVelocity:  alert.salesVelocity
+      });
+      return acc;
+    }, {});
+  }, [restockAlerts]);
 
   const handleDelete = (product) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
@@ -205,33 +234,43 @@ const CategoryProducts = () => {
             <Typography textAlign="center">No products found</Typography>
           ) : (
             <Grid container spacing={3} alignItems="stretch">
-              {displayedProducts.map((product) => (
-                <Grid item key={product._id} xs={12} sm={12} md={6} lg={3}>
-                  <Box
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      transition: "transform 0.2s ease-in-out",
-                      "&:hover": {
-                        transform: "translateY(-4px)",
-                      },
-                    }}
-                  >
-                    <ProductCard
-                      product={product}
-                      isAdmin={isAdmin}
-                      onDelete={handleDelete}
-                      onUpdateStock={handleUpdateStock}
-                      onEdit={handleEdit}
-                      onAddToCart={handleAddToCart}
-                      onIncrement={handleIncrement}
-                      onDecrement={handleDecrement}
-                      quantity={0}
-                    />
-                  </Box>
-                </Grid>
-              ))}
+              {displayedProducts.map((product) => {
+                const flavorAlerts = alertsByProduct[product._id] || [];
+                const borderColor =
+                  flavorAlerts.some(a => a.salesVelocity === 'Slow') ? 'red' :
+                  flavorAlerts.some(a => a.salesVelocity === 'Fast') ? 'green' : 
+                  flavorAlerts.some(a => a.salesVelocity === 'Average') ? 'yellow' :
+                                        'transparent';
+
+                return (
+                  <Grid item key={product._id} xs={12} sm={12} md={6} lg={3}>
+                    <Box
+                      sx={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        transition: 'transform 0.2s',
+                        '&:hover': { transform: 'translateY(-4px)' },
+                        border: `1.5px solid ${borderColor}`,
+                        borderRadius: 1
+                      }}
+                    >
+                      <ProductCard
+                        product={product}
+                        isAdmin={isAdmin}
+                        onDelete={handleDelete}
+                        onUpdateStock={handleUpdateStock}
+                        onEdit={handleEdit}
+                        onAddToCart={handleAddToCart}
+                        onIncrement={handleIncrement}
+                        onDecrement={handleDecrement}
+                        quantity={0}
+                        flavorAlerts={flavorAlerts}
+                      />
+                    </Box>
+                  </Grid>
+                );
+              })}
             </Grid>
           )}
           {totalPages > 1 && (

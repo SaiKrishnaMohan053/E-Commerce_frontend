@@ -21,6 +21,7 @@ import OrdersPage from "./pages/orderPages/ordersPage.js";
 import OrderDetailPage from "./pages/orderPages/orderDetailPage.js";
 import AdminDashboard from "./pages/adminPages/adminDashboard.js";
 import AddProduct from "./pages/adminPages/addProduct.js";
+import AdminAdsPage from "./pages/adminPages/adminAdsPage.js";
 import { logout } from "./store/slices/authSlice.js"; 
 
 
@@ -67,6 +68,7 @@ const App = () => {
         <Route path="/user-dashboard" element={user ? <UserDashboard /> : <Navigate to="/login" />} />
         <Route path="/admin-dashboard" element={decodedUser?.isAdmin ? <AdminDashboard /> : <Navigate to="/login" />} />
         <Route path="/admin/add-product" element={decodedUser?.isAdmin ? <AddProduct /> : <Navigate to="/login" />} />
+        <Route path="/adminAds" element={decodedUser?.isAdmin ? <AdminAdsPage /> : <Navigate to="/login" />} />
         <Route path="/category/:category" element={<CategoryProductsPage isAdmin={user?.isAdmin} />} />
         <Route path="/category/:category/:subCategory" element={<CategoryProductsPage isAdmin={user?.isAdmin} />} />
         <Route path="/product/:id" element={<ProductPage />} />

@@ -23,6 +23,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import LogoutIcon from "@mui/icons-material/Logout";
 import LoginIcon from "@mui/icons-material/Login";
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { jwtDecode } from "jwt-decode";
@@ -148,6 +149,13 @@ const Navbar = () => {
               <ListItemText primary={`Cart (${cartItemCount})`} primaryTypographyProps={{ fontSize: 16 }} />
             </ListItemButton>
           </>
+        )}
+
+        {isAdmin && (
+          <ListItemButton onClick={() => navigate("/adminAds")} sx={{ py: 1.5 }}>
+            <ListItemIcon><AdminPanelSettingsIcon /></ListItemIcon>
+            <ListItemText primary="Admin Ads" primaryTypographyProps={{ fontSize: 16 }} />
+          </ListItemButton>
         )}
   
         {user ? (
@@ -284,6 +292,10 @@ const Navbar = () => {
                   </Badge>
                 </IconButton>
               </>
+            )}
+
+            {isAdmin && (
+              <Button color="inherit" sx={{ textTransform: "none", mr: 2 }} onClick={() => navigate("/adminAds")}>Ad Poster</Button>
             )}
 
             {user ? (
