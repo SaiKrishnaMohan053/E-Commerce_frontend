@@ -44,7 +44,9 @@ const ProductCard = ({
   const inWishlist = useSelector((state) => state.wishlist.items.some(item => item._id === product._id));
 
   const [selIdx, setSelIdx] = useState(0);
-  const selected = flavorAlerts[selIdx] || {};
+  const selected = flavorAlerts.length > 0
+    ? flavorAlerts[selIdx] 
+    : { flavorName: 'Default', avgWeeklySales: 0, reorderPoint: 0, salesVelocity: 'Average' };
 
   const sortFlavorsAZ = (flavors = []) =>
     [...flavors].sort((a, b) =>
@@ -675,86 +677,83 @@ const ProductCard = ({
       )}
 
       {isAdmin && (
-          <Box mt={2}>
-            {hasFlavors
-              ? (
-                <FormControl fullWidth size="small">
-                  <InputLabel id={`flavor-label-${product._id}`}>
-                    Flavor & Metrics
-                  </InputLabel>
-                  <Select
-                    labelId={`flavor-label-${product._id}`}
-                    value={selIdx}
-                    label="Flavor & Metrics"
-                    onChange={e => setSelIdx(e.target.value)}
+        <Box mt={2}>
+          {hasFlavors && flavorAlerts.length > 0 ? (
+            <FormControl fullWidth size="small">
+              <InputLabel id={`flavor-label-${product._id}`}>
+                Flavor & Metrics
+              </InputLabel>
+              <Select
+                labelId={`flavor-label-${product._id}`}
+                value={selIdx}
+                label="Flavor & Metrics"
+                onChange={e => setSelIdx(e.target.value)}
+              >
+                {flavorAlerts.map((f, idx) => (
+                  <MenuItem
+                    key={idx}
+                    value={idx}
+                    sx={{ display: "flex", justifyContent: "space-between" }}
                   >
-                    {flavorAlerts.map((f, idx) => (
-                      <MenuItem
-                        key={f.flavorName || idx}
-                        value={idx}
-                        sx={{ display: "flex", justifyContent: "space-between" }}
+                    <Box component="span">{f.flavorName || 'Default'}</Box>
+                    <Box component="span" textAlign="right">
+                      <Typography variant="caption">
+                        Avg: {Math.round(f.avgWeeklySales ?? 0)}
+                      </Typography>
+                      &nbsp;|&nbsp;
+                      <Typography variant="caption">
+                        Reorder: {Math.round(f.reorderPoint ?? 0)}
+                      </Typography>
+                      &nbsp;|&nbsp;
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color:
+                            f.salesVelocity === "Fast"
+                              ? "green"
+                              : f.salesVelocity === "Slow"
+                                ? "red"
+                                : "gray",
+                        }}
                       >
-                        <Box component="span">{f.flavorName || "Default"}</Box>
-                        <Box component="span" textAlign="right">
-                          <Typography variant="caption">
-                            Avg: {Math.round(f.avgWeeklySales)}
-                          </Typography>
-                          &nbsp;|&nbsp;
-                          <Typography variant="caption">
-                            Reorder: {Math.round(f.reorderPoint)}
-                          </Typography>
-                          &nbsp;|&nbsp;
-                          <Typography
-                            variant="caption"
-                            component="span"
-                            sx={{
-                              color:
-                                f.salesVelocity === "Fast"
-                                  ? "green"
-                                  : f.salesVelocity === "Slow"
-                                    ? "red"
-                                    : "gray",
-                            }}
-                          >
-                            {f.salesVelocity}
-                          </Typography>
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              ) : (
-                <Box>
-                  <Typography variant="caption">
-                    Avg Weekly Sold:&nbsp;
-                    <strong>{Math.round(selected.avgWeeklySales)}</strong>
-                  </Typography>
-                  <br />
-                  <Typography variant="caption">
-                    Reorder Point:&nbsp;
-                    <strong>{Math.round(selected.reorderPoint)}</strong>
-                  </Typography>
-                  <br />
-                  <Typography variant="caption">
-                    Velocity:&nbsp;
-                    <strong
-                      style={{
-                        color:
-                          selected.salesVelocity === "Fast"
-                            ? "green"
-                            : selected.salesVelocity === "Slow"
-                              ? "red"
-                              : "gray",
-                      }}
-                    >
-                      {selected.salesVelocity}
-                    </strong>
-                  </Typography>
-                </Box>
-              )
-            }
-          </Box>
-        )}
+                        {f.salesVelocity}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <Box>
+              <Typography variant="caption">
+                Avg Weekly Sold:&nbsp;
+                <strong>{Math.round(selected.avgWeeklySales ?? 0)}</strong>
+              </Typography>
+              <br />
+              <Typography variant="caption">
+                Reorder Point:&nbsp;
+                <strong>{Math.round(selected.reorderPoint ?? 0)}</strong>
+              </Typography>
+              <br />
+              <Typography variant="caption">
+                Velocity:&nbsp;
+                <strong
+                  style={{
+                    color:
+                      selected.salesVelocity === "Fast"
+                        ? "green"
+                        : selected.salesVelocity === "Slow"
+                          ? "red"
+                          : "gray",
+                  }}
+                >
+                  {selected.salesVelocity}
+                </strong>
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )}
 
       <EditModal
         open={editOpen}
