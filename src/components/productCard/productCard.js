@@ -689,17 +689,6 @@ const ProductCard = ({
                 label="Flavor & Metrics"
                 onChange={e => setSelIdx(e.target.value)}
                 displayEmpty
-              MenuProps={{
-                PaperProps: {
-                  style: { maxWidth: "90vw", boxSizing: "border-box" },
-                  sx: {
-                    ".MuiMenuItem-root": {
-                      whiteSpace: "normal",
-                      overflowWrap: "break-word"
-                    }
-                  }
-                }
-              }}
               >
                 {flavorAlerts.map((f, idx) => (
                   <MenuItem
@@ -707,7 +696,7 @@ const ProductCard = ({
                     value={idx}
                     sx={{ display: "flex", justifyContent: "space-between" }}
                   >
-                    <Box component="span">{f.flavorName || 'Default'}</Box>
+                    <Box component="span" sx={{ whiteSpace: "normal", overflowWrap: "break-word", pr: 1 }}>{f.flavorName || 'Default'}</Box>
                     <Box component="span" textAlign="right">
                       <Typography variant="caption">
                         Avg: {Math.round(f.avgWeeklySales ?? 0)}
