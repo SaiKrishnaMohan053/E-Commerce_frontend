@@ -688,6 +688,18 @@ const ProductCard = ({
                 value={selIdx}
                 label="Flavor & Metrics"
                 onChange={e => setSelIdx(e.target.value)}
+                displayEmpty
+              MenuProps={{
+                PaperProps: {
+                  style: { maxWidth: "90vw", boxSizing: "border-box" },
+                  sx: {
+                    ".MuiMenuItem-root": {
+                      whiteSpace: "normal",
+                      overflowWrap: "break-word"
+                    }
+                  }
+                }
+              }}
               >
                 {flavorAlerts.map((f, idx) => (
                   <MenuItem
