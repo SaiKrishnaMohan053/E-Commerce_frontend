@@ -43,7 +43,6 @@ const ProductCard = ({
   const cartItems = useSelector((state) => state.cart.items);
   const inWishlist = useSelector((state) => state.wishlist.items.some(item => item._id === product._id));
 
-  const hasFlavor = flavorAlerts.length > 1;
   const [selIdx, setSelIdx] = useState(0);
   const selected = flavorAlerts[selIdx] || {};
 

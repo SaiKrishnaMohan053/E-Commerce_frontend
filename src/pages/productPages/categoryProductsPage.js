@@ -34,6 +34,7 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 const CategoryProducts = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { token } = useSelector((state) => state.auth.user);
   const { products, loading, error, totalPages } = useSelector((state) => state.product);
   const { category, subCategory } = useParams();
   const subCategories = subCategory;
@@ -81,9 +82,9 @@ const CategoryProducts = () => {
 
   const storedUser = JSON.parse(localStorage.getItem("user"));
   let isAdmin = false;
-  if (storedUser?.token) {
+  if (storedUser?.token || token) {
     try {
-      const decoded = jwtDecode(storedUser.token);
+      const decoded = jwtDecode(storedUser.token || token);
       isAdmin = decoded?.isAdmin;
     } catch (err) {
       dispatch(showAlert({ message: "Invalid token", severity: "error" }));
