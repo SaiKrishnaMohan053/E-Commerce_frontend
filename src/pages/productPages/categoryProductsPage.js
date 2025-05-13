@@ -80,11 +80,10 @@ const CategoryProducts = () => {
     setSearchParams({ page: pageNum.toString() });
   };
 
-  const storedUser = JSON.parse(localStorage.getItem("user"));
   let isAdmin = false;
-  if (storedUser?.token || token) {
+  if (token) {
     try {
-      const decoded = jwtDecode(storedUser.token || token);
+      const decoded = jwtDecode(token);
       isAdmin = decoded?.isAdmin;
     } catch (err) {
       dispatch(showAlert({ message: "Invalid token", severity: "error" }));
