@@ -29,7 +29,7 @@ import {
 } from "../../store/slices/productSlice";
 import { showAlert } from "../../store/slices/alertSlice";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const CategoryProducts = () => {
   const dispatch = useDispatch();
@@ -94,7 +94,7 @@ const CategoryProducts = () => {
     async function loadAlerts() {
       try {
         const { data } = await axios.get(`${API_URL}/api/admin/restock-alerts`);
-        setRestockAlerts(data);
+        setRestockAlerts(data);                
       } catch (err) {
         console.error(err);
       }
