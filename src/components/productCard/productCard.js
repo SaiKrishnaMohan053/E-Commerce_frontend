@@ -11,6 +11,7 @@ import {
   Select,
   MenuItem,
   TextField,
+  Chip,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -36,6 +37,7 @@ const ProductCard = ({
   onUpdateStock,
   onDelete,
   flavorAlerts = [],
+  isLowStock
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -402,6 +404,7 @@ const ProductCard = ({
     <Card
       sx={{
         position: "relative",
+        overflow: "visible",
         height: "100%",
         display: "flex",
         flexDirection: "column",
@@ -412,6 +415,9 @@ const ProductCard = ({
         minHeight: { xs: "auto", sm: 380, md: 420 },
       }}
     >
+      { !hasFlavors && isLowStock && (
+        <Chip label="Low" color="error" size="small" sx={{ position: "absolute", top: 4, right: 4, fontSize: "0.5rem", fontWeight: 600, zIndex: 1 }} />
+      ) }
       {!isAdmin && <IconButton
         onClick={() =>
           inWishlist
@@ -541,7 +547,7 @@ const ProductCard = ({
           )}
         </Box>
 
-        {Number(availableStock) === 0 && (
+        {availableStock <= 0 && (
           <Typography
             variant="h6"
             sx={{
@@ -694,21 +700,50 @@ const ProductCard = ({
                   <MenuItem
                     key={idx}
                     value={idx}
-                    sx={{ display: "flex", justifyContent: "space-between" }}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",    
+                      alignItems: "flex-start",
+                      py: 0.5,
+                      px: 1,
+                      gap: 0.5,                   
+                    }}
                   >
-                    <Box component="span" sx={{ whiteSpace: "normal", overflowWrap: "break-word", pr: 1 }}>{f.flavorName || 'Default'}</Box>
-                    <Box component="span" textAlign="right">
-                      <Typography variant="caption">
-                        Avg: {Math.round(f.avgWeeklySales ?? 0)}
+                    <Box sx={{ display: "flex", alignItems: "center", width: "100%" }}>
+                      <Typography
+                        variant="body2"
+                        noWrap
+                        sx={{ flexGrow: 1, fontWeight: 500 }}
+                      >
+                        {`${f.flavorName || "Default"} - ${f.currentStock}`}
                       </Typography>
-                      &nbsp;|&nbsp;
-                      <Typography variant="caption">
-                        Reorder: {Math.round(f.reorderPoint ?? 0)}
+                      {f.isLowStock && (
+                        <Chip
+                          label="Low"
+                          color="error"
+                          size="small"
+                          sx={{
+                            minWidth: 0,
+                            height: 18,
+                            fontSize: "0.6rem",
+                            px: 0.5,
+                            ml: 1,
+                          }}
+                        />
+                      )}
+                    </Box>
+
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Typography variant="caption" sx={{ fontSize: "0.65rem" }}>
+                        Avg: {Math.round(f.avgWeeklySales)}
                       </Typography>
-                      &nbsp;|&nbsp;
+                      <Typography variant="caption" sx={{ fontSize: "0.65rem" }}>
+                        | Reorder: {Math.round(f.reorderPoint)}
+                      </Typography>
                       <Typography
                         variant="caption"
                         sx={{
+                          fontSize: "0.65rem",
                           color:
                             f.salesVelocity === "Fast"
                               ? "green"
@@ -717,7 +752,7 @@ const ProductCard = ({
                                 : "gray",
                         }}
                       >
-                        {f.salesVelocity}
+                        | {f.salesVelocity}
                       </Typography>
                     </Box>
                   </MenuItem>
@@ -750,6 +785,11 @@ const ProductCard = ({
                 >
                   {selected.salesVelocity}
                 </strong>
+              </Typography>
+              <br />
+              <Typography variant="caption">
+                Current Stock:&nbsp;
+                <strong>{selected.currentStock ?? 0}</strong>
               </Typography>
             </Box>
           )}

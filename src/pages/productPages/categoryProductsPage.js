@@ -93,14 +93,14 @@ const CategoryProducts = () => {
   useEffect(() => {
     async function loadAlerts() {
       try {
-        const { data } = await axios.get(`${API_URL}/api/admin/restock-alerts`);
+        const { data } = await axios.get(`${API_URL}/api/admin/restock-alerts`, { headers:{ Authorization:`Bearer ${token}` }});
         setRestockAlerts(data);                
       } catch (err) {
         console.error(err);
       }
     }
     if (isAdmin) loadAlerts();
-  }, [isAdmin]);
+  }, [isAdmin, token]);
   
   const alertsByProduct = React.useMemo(() => {
     return restockAlerts.reduce((acc, alert) => {
@@ -110,11 +110,14 @@ const CategoryProducts = () => {
         flavorName: alert.flavorName || 'Default',
         avgWeeklySales: Math.round(alert.avgWeeklySales),
         reorderPoint:   Math.round(alert.reorderPoint),
-        salesVelocity:  alert.salesVelocity
+        salesVelocity:  alert.salesVelocity,
+        currentStock:   alert.currentStock,
+        isLowStock:     alert.isLowStock
       });
       return acc;
     }, {});
   }, [restockAlerts]);
+  console.log(alertsByProduct);
 
   const handleDelete = (product) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
@@ -266,6 +269,7 @@ const CategoryProducts = () => {
                         onDecrement={handleDecrement}
                         quantity={0}
                         flavorAlerts={flavorAlerts}
+                        isLowStock={flavorAlerts.some(f=>f.isLowStock)}
                       />
                     </Box>
                   </Grid>
