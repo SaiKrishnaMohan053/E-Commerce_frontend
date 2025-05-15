@@ -98,11 +98,13 @@ export const fetchOrderById = createAsyncThunk(
 
 export const fetchAllOrders = createAsyncThunk(
   "order/fetchAll",
-  async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
+  async ({ page = 1, limit = 10, status = "" }, { rejectWithValue }) => {
     try {
       const token = JSON.parse(localStorage.getItem("user"))?.token;
+      const qs = new URLSearchParams({ page, limit, ...(status && { status }) });
+
       const { data } = await axios.get(
-        `${API_BASE_URL}/api/orders/getOrders?page=${page}&limit=${limit}`,
+        `${API_BASE_URL}/api/orders/getOrders?${qs}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       return data;

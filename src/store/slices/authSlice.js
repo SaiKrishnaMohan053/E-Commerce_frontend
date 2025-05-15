@@ -165,7 +165,10 @@ export const fetchUsers = createAsyncThunk("admin/fetchUsers", async (_, { rejec
     const { data } = await axios.get(`${API_BASE_URL}/api/users`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return data;
+    return {
+      users: data.users,
+      unapprovedCount: data.unapprovedCount
+    };
   } catch (error) {
     return rejectWithValue(error.response?.data?.message || "Failed to fetch users.");
   }
@@ -229,6 +232,7 @@ const authSlice = createSlice({
     error: null,
     message: null, 
     users: [],
+    unapprovedCount: 0
   },
   reducers: {
     logout: (state) => {
@@ -323,7 +327,8 @@ const authSlice = createSlice({
       })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.usersLoading = false;
-        state.users = action.payload;
+        state.users = action.payload.users;
+        state.unapprovedCount = action.payload.unapprovedCount;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.usersLoading = false;

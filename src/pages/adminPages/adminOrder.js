@@ -34,7 +34,16 @@ const AdminOrdersPage = () => {
   const navigate = useNavigate();
   const { allOrders, loading, error, page, totalPages } = useSelector((state) => state.order);
   const [searchTerm, setSearchTerm] = useState("");
-  
+  const [statusFilter, setStatusFilter] = useState("");
+
+  useEffect(() => {
+    dispatch(fetchAllOrders({ page: 1, limit: 10, status: statusFilter }));
+  }, [dispatch, statusFilter]);
+
+  const onPageChange = (_, value) => {
+    dispatch(fetchAllOrders({ page: value, limit: 10, status: statusFilter }));
+  };
+
   const formatted = useMemo(() => {
     if (!Array.isArray(allOrders)) return [];
     const dateOpts = { year: "numeric", month: "short", day: "numeric" };
@@ -45,17 +54,9 @@ const AdminOrdersPage = () => {
     }));
   }, [allOrders]);
 
-  useEffect(() => {
-    dispatch(fetchAllOrders({ page: 1, limit: 10 }));
-  }, [dispatch]);
-
-  const onPageChange = (_, value) => {
-    dispatch(fetchAllOrders({ page: value, limit: 10 }));
-  };
-
   const filtered = useMemo(() => {
     if (!searchTerm.trim()) return formatted;
-    return formatted.filter((o) =>
+    return formatted.filter(o =>
       o.user.storeName.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [formatted, searchTerm]);
@@ -90,6 +91,19 @@ const AdminOrdersPage = () => {
         size="small"
         fullWidth
       />
+
+      <Box mb={2} display="flex" flexWrap="wrap" gap={1}>
+        {["", "Pending", "Processing", "Order Ready", "Delivered", "Pickedup", "Cancelled"].map(s => (
+          <Button
+            key={s || "all"}
+            size="small"
+            variant={statusFilter === s ? "contained" : "outlined"}
+            onClick={() => setStatusFilter(s)}
+          >
+            {s === "" ? "All" : s}
+          </Button>
+        ))}
+      </Box>
 
       {filtered.length === 0 ? (
         <Typography>No orders to display.</Typography>
