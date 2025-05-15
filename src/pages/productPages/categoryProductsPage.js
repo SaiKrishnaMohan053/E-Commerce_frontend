@@ -34,7 +34,7 @@ const API_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 const CategoryProducts = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { token } = useSelector((state) => state.auth.user);
+  const token = useSelector((state) => state.auth.user?.token);
   const { products, loading, error, totalPages } = useSelector((state) => state.product);
   const { category, subCategory } = useParams();
   const subCategories = subCategory;
