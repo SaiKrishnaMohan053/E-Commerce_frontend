@@ -47,7 +47,7 @@ const Login = () => {
       if (decoded.isAdmin) {
         navigate("/admin-dashboard");
       } else {
-        navigate("/user-dashboard");
+        navigate("/");
       }
     }
   }, [user, navigate, dispatch]); 
@@ -92,7 +92,7 @@ const Login = () => {
         if (decoded.isAdmin) {
           navigate("/admin-dashboard");
         } else {
-          navigate("/user-dashboard");
+          navigate("/");
         }
       })
       .catch((err) => dispatch(showAlert({ message: err, severity: "error" })));

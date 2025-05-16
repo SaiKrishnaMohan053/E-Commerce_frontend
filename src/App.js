@@ -61,11 +61,11 @@ const App = () => {
     <Layout>
       {loading && <PageLoader />}
       <Routes>
-        <Route path="/login" element={user ? (decodedUser?.isAdmin ? <Navigate to="/admin-dashboard"/> : <Navigate to="/user-dashboard"/>) : <Login />} />
+        <Route path="/login" element={user ? (decodedUser?.isAdmin ? <Navigate to="/admin-dashboard"/> : <Navigate to="/"/>) : <Login />} />
         <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
         <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/user-dashboard" element={<UserDashboard />} />
+        <Route path="/" element={<UserDashboard />} />
         <Route path="/admin-dashboard" element={decodedUser?.isAdmin && <AdminDashboard />} />
         <Route path="/admin/add-product" element={decodedUser?.isAdmin ? <AddProduct /> : <Navigate to="/login" />} />
         <Route path="/adminAds" element={decodedUser?.isAdmin ? <AdminAdsPage /> : <Navigate to="/login" />} />

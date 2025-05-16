@@ -185,7 +185,7 @@ const Navbar = () => {
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
       <Box
           sx={{ width: 120, height: 40, cursor: "pointer" }}
-          onClick={() => isAdmin ? navigate("/admin-dashboard") : navigate("/user-dashboard")}
+          onClick={() => isAdmin ? navigate("/admin-dashboard") : navigate("/")}
         >
           <img src="" alt="Your Brand" style={{ width: 120, height: 40 }} />
       </Box>
