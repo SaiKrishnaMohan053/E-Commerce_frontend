@@ -50,6 +50,15 @@ This is the frontend e-commerce web application. It is built using React.js and 
   * List layout matching cart style, responsive for mobile/tablet/desktop
   * Move items between wishlist & cart with a single click
 
+### User Dashboard
+  * User Dashboard with Top Sellers, Deals, and New Arrivals sections
+  * Horizontal, scrollable **See More** cards that expand to show all items
+  * `userDashboardSlice` in Redux for fetching combined dashboard data
+  * `MiniProductCard` component supporting deals, dynamic prices, and conditional price display for logged‐in users
+  * `AdsCarousel` component:
+    - One‐slide‐per‐screen carousel with peek of next slide
+    - Automatic sliding and manual arrows
+
 ### Admin
 
 * **Login as Admin**

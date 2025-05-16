@@ -65,8 +65,8 @@ const App = () => {
         <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
         <Route path="/profile" element={user ? <Profile /> : <Navigate to="/login" />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/user-dashboard" element={user ? <UserDashboard /> : <Navigate to="/login" />} />
-        <Route path="/admin-dashboard" element={decodedUser?.isAdmin ? <AdminDashboard /> : <Navigate to="/login" />} />
+        <Route path="/user-dashboard" element={<UserDashboard />} />
+        <Route path="/admin-dashboard" element={decodedUser?.isAdmin && <AdminDashboard />} />
         <Route path="/admin/add-product" element={decodedUser?.isAdmin ? <AddProduct /> : <Navigate to="/login" />} />
         <Route path="/adminAds" element={decodedUser?.isAdmin ? <AdminAdsPage /> : <Navigate to="/login" />} />
         <Route path="/category/:category" element={<CategoryProductsPage isAdmin={user?.isAdmin} />} />

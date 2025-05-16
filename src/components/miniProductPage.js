@@ -35,7 +35,7 @@ const MiniProductCard = ({ product }) => {
       <CardMedia
         component="img"
         height="140"
-        image={product.images?.[0]?.url || "/placeholder.png"}
+        image={product.images?.[0]?.url || product.image?.url || "/placeholder.png"}
         alt={product.name}
         sx={{ objectFit: "contain", backgroundColor: "#f8f8f8" }}
       />

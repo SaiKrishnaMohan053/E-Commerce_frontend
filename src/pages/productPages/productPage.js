@@ -21,7 +21,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import { fetchWishlist, addWishlistItem, removeWishlistItem } from "../../store/slices/wishlistSlice";
 import { addToCart, updateCartItem, removeCartItem } from "../../store/slices/cartSlice";
 import { fetchSingleProduct, fetchProductsByCategory } from "../../store/slices/productSlice";
-import MiniProductCard from "./miniProductPage";
+import MiniProductCard from "../../components/miniProductPage";
 import ProductImages from "../../components/productImg";
 import { showAlert } from "../../store/slices/alertSlice";
 
