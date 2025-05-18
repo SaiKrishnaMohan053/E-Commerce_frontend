@@ -58,7 +58,7 @@ const Navbar = () => {
       if (searchTerm.length > 1) {
         try {
           const { data } = await axios.get(
-            `${API_BASE_URL}/api/products/getProducts?name=${searchTerm}`
+            `${API_BASE_URL}/api/products/getProducts?search=${searchTerm}`
           );
           setSearchResults(data.products || []);
         } catch (err) {

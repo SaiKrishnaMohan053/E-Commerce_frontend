@@ -36,7 +36,7 @@ const OrderDetailPage = () => {
   const [status, setStatus] = useState("");
   const [invoice, setInvoice] = useState(null);  
 
-  const token = user.token
+  const token = user?.token
   const isAdmin = React.useMemo(() => {
     if (!token) return false;
     try {
@@ -125,7 +125,7 @@ const OrderDetailPage = () => {
         Order Details
       </Typography>
 
-      <Typography><strong>Order #:</strong> {order._id}</Typography>
+      <Typography><strong>Order Number:</strong> {order.orderNumber}</Typography>
       <Typography><strong>User:</strong> {order.user.storeName}</Typography>
       <Typography><strong>Date:</strong> {new Date(order.createdAt).toLocaleString()}</Typography>
       <Typography>

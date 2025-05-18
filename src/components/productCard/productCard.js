@@ -476,6 +476,8 @@ const ProductCard = ({
           {product.name}
         </Typography>
 
+        {isAdmin && <Typography variant="subtitle2">SKU: {product.sku}</Typography>}
+
         {isLoggedIn && product.isDeal && product.discountType && (
           <Typography
             variant="body2"
@@ -684,7 +686,7 @@ const ProductCard = ({
 
       {isAdmin && (
         <Box mt={2}>
-          {hasFlavors && flavorAlerts.length > 0 ? (
+          {hasFlavors ? (
             <FormControl fullWidth size="small">
               <InputLabel id={`flavor-label-${product._id}`}>
                 Flavor & Metrics
@@ -696,7 +698,15 @@ const ProductCard = ({
                 onChange={e => setSelIdx(e.target.value)}
                 displayEmpty
               >
-                {flavorAlerts.map((f, idx) => (
+                {(flavorAlerts.length > 0 ? flavorAlerts : product.flavors.map(f => ({
+                  flavorName: f.name,
+                  currentStock: f.stock,
+                  avgWeeklySales: 0,
+                  reorderPoint: 0,
+                  salesVelocity: 'Average',
+                  isLowStock: f.stock < 5
+                 }))
+                ).map((f, idx) => (
                   <MenuItem
                     key={idx}
                     value={idx}

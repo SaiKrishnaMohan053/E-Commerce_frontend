@@ -56,9 +56,13 @@ const AdminOrdersPage = () => {
 
   const filtered = useMemo(() => {
     if (!searchTerm.trim()) return formatted;
-    return formatted.filter(o =>
-      o.user.storeName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return formatted.filter(o => {
+      const term = searchTerm.toLowerCase();
+      return (
+        o.user.storeName.toLowerCase().includes(term) ||
+        o.orderNumber?.toLowerCase().includes(term)
+      );
+    });    
   }, [formatted, searchTerm]);
 
   if (loading) {
@@ -85,7 +89,7 @@ const AdminOrdersPage = () => {
       <Typography variant="h4" mb={3}>All Orders (Admin)</Typography>
 
       <TextField
-        placeholder="Search by Store Name…"
+        placeholder="Search by Store Name or Order Number..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         size="small"
@@ -114,7 +118,7 @@ const AdminOrdersPage = () => {
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Order #</TableCell>
+                    <TableCell>Order Number</TableCell>
                     <TableCell>Date</TableCell>
                     <TableCell align="right">Store Name</TableCell>
                     <TableCell align="right">Total</TableCell>
@@ -126,7 +130,7 @@ const AdminOrdersPage = () => {
                 <TableBody>
                   {filtered.map((o) => (
                     <TableRow key={o._id} hover>
-                      <TableCell>{o._id}</TableCell>
+                      <TableCell>{o.orderNumber}</TableCell>
                       <TableCell>{o.date}</TableCell>
                       <TableCell align="right">{o.user.storeName}</TableCell>
                       <TableCell align="right">${o.total.toFixed(2)}</TableCell>

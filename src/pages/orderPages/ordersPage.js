@@ -114,7 +114,7 @@ const OrdersPage = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell>Order #</TableCell>
+                  <TableCell>Order Number</TableCell>
                   <TableCell>Date</TableCell>
                   <TableCell align="right">Total</TableCell>
                   <TableCell>Method</TableCell>
@@ -125,7 +125,7 @@ const OrdersPage = () => {
               <TableBody>
                 {formattedOrders.map((order) => (
                   <TableRow key={order._id} hover>
-                    <TableCell>{order._id}</TableCell>
+                    <TableCell>{order.orderNumber}</TableCell>
                     <TableCell>
                       <time dateTime={order.createdAt}>{order.date}</time>
                     </TableCell>

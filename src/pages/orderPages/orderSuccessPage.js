@@ -73,7 +73,7 @@ const OrderSuccessPage = () => {
         Thank you for your order!
       </Typography>
       <Typography variant="subtitle1" mb={3}>
-        Your order <strong>#{order._id}</strong> has been placed successfully.
+        Your order <strong>{order.orderNumber}</strong> has been placed successfully.
       </Typography>
 
       <Divider sx={{ my: 3 }} />
